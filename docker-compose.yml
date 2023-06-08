@@ -7,18 +7,18 @@ services:
       dockerfile: Dockerfile
     ports:
       - 6061:6061
-    volumes:
-      - ./services/customers:/app
-    depends_on:
-      - lmsdb
-    links:
-      - lmsdb
+    # volumes:
+    #   - ./services/customers:/app
+    # depends_on:
+    #   - lmsdb
+    # links:
+    #   - lmsdb
     restart: unless-stopped
 
-  lmsdb:
-    container_name: lms_db
-    build:
-      context: ./services/db
-      dockerfile: Dockerfile
-    ports:
-      - 5432:5432
+  # lmsdb:
+  #   container_name: lms_db
+  #   build:
+  #     context: ./services/db
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - 5432:5432
