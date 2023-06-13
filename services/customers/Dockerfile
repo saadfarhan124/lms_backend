@@ -8,12 +8,16 @@ RUN apt-get update -yqq \
 
 WORKDIR /app
 
-COPY ./requirements.txt .
+COPY ./requirements.txt /app/requirements.txt
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
 
-COPY . .
+COPY ./app /app
 
 EXPOSE 6061
 
-CMD ["python", "main.py"]
+CMD ["uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "6061"]
+
+
+# CMD ["python", "main.py"]
+# CMD ["uvicorn", "main:app", "--reload", "--port", "6061"]
