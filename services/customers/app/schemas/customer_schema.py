@@ -29,8 +29,8 @@ class AddressCreate(BaseModel):
     individual_id: Union[int, None]
 
 
-class AddressUpdate(BaseModel):
-    pass
+class AddressUpdate(AddressCreate):
+    id: int
 
 class Address(AddressCreate):
     id: int
