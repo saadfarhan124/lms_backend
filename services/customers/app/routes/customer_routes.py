@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from typing import List
-from app.schemas import CustomerCreate, Customer, Individual, AddressUpdate, EmployerUpdate, BussinessCustomerCreate, Business
+from app.schemas import CustomerCreate, Individual, AddressUpdate, EmployerUpdate, BussinessCustomerCreate, Business, BussinessUpdate
 from app.database.database import get_db
 from app.utils import customer as customer_crud, email_address_crud, employer_crud, address_crud, mobile_number_crud, individual_crud, bussiness_crud
 
@@ -60,8 +60,23 @@ def create_customer_business(customer: BussinessCustomerCreate, db: Session = De
     customer.business.customer_id = cust_obj.id
     business_obj = bussiness_crud.create(db, create_schema=customer.business)
     return business_obj
-# Get Customer Business By ID
-# Get All Customers Business
 
+
+# Get Customer Business By ID
+@router.get("/customers/business/{id}", response_model=Business)
+def get_business_by_id(id: int, db: Session = Depends(get_db)):
+    return  bussiness_crud.get(db, id=id)
+
+# Get All Customers Business
+@router.get("/customers/business/{offset}/{limit}", response_model=List[Business])
+def get_all_businesses(offset: int, limit: int, db: Session= Depends(get_db)):
+    return bussiness_crud.get_multi(db, offset=offset, limit=limit)
+
+# Update Business
+@router.put("/customers/business")
+def update_business(business: BussinessUpdate, db: Session = Depends(get_db)):
+    business_obj = bussiness_crud.get(db, id=business.id)
+    return bussiness_crud.update(db, db_obj=business_obj, update_schema=business
+                                 )
 # Delete Customer Individual
 # Delete Customer Business
