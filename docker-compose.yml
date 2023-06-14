@@ -9,15 +9,18 @@ services:
       - 6061:6061
     volumes:
       - ./services/customers:/app
-    # depends_on:
-    #   - lmsdb
-    # links:
-    #   - lmsdb
+    depends_on:
+      - lmsdb
+    links:
+      - lmsdb
 
-  # lmsdb:
-  #   container_name: lms_db
-  #   build:
-  #     context: ./services/db
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - 5432:5432
+  lmsdb:
+    container_name: lms_db
+    build:
+      context: ./services/db
+      dockerfile: Dockerfile
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 5432:5432
