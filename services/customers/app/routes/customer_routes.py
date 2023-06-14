@@ -9,7 +9,7 @@ from app.constants import CustomerType
 router = APIRouter()
 
 
-@router.post("/customers/", response_model=Individual)
+@router.post("/customers/individual", response_model=Individual)
 def create_customer(customer: CustomerCreate, db: Session = Depends(get_db)):
     cust_obj = customer_crud.create(db, create_schema=customer)
     if cust_obj.user_type == CustomerType.INDIVIDUAL.value:
@@ -28,3 +28,8 @@ def create_customer(customer: CustomerCreate, db: Session = Depends(get_db)):
             mobile_numbers.append(mobile_number_crud.create(db, create_schema=mobile_number))
         individual_obj.marital_status_string = "individual_obj.marital_status_string"
         return individual_obj
+    
+
+@router.get("/customers/individual/{user_id}", response_model=Individual)
+def get_individual_customer(user_id:int, db:Session = Depends(get_db)):
+    return individual_crud.get(db, id=user_id)
