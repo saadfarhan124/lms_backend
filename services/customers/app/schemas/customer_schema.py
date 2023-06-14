@@ -3,6 +3,7 @@ from typing import Union
 from datetime import date
 from app.constants import get_marital_status_string, get_business_type_string, get_gender_string, get_occupation_status_string
 
+
 class EmployerCreate(BaseModel):
     name: str
     address: str
@@ -14,8 +15,10 @@ class EmployerCreate(BaseModel):
 class EmployerUpdate(EmployerCreate):
     id: int
 
+
 class Employer(EmployerCreate):
-    id:int
+    id: int
+
     class Config:
         orm_mode = True
 
@@ -32,10 +35,13 @@ class AddressCreate(BaseModel):
 class AddressUpdate(AddressCreate):
     id: int
 
+
 class Address(AddressCreate):
     id: int
+
     class Config:
         orm_mode = True
+
 
 class MobileNumberCreate(BaseModel):
     number: str
@@ -48,6 +54,7 @@ class MobileNumberUpdate(BaseModel):
 
 class MobileNumber(MobileNumberCreate):
     id: int
+
     class Config:
         orm_mode = True
 
@@ -56,11 +63,14 @@ class EmailAddressCreate(BaseModel):
     email: str
     individual_id: Union[int, None]
 
+
 class EmailAddressUpdate(BaseModel):
     pass
 
+
 class EmailAddress(EmailAddressCreate):
     id: int
+
     class Config:
         orm_mode = True
 
@@ -100,10 +110,12 @@ class IndividualUpdate(BaseModel):
     pass
 
 
-
-class CustomerCreate(BaseModel):
+class CustomerBase(BaseModel):
     photo: str
     user_type: int
+
+
+class CustomerCreate(BaseModel):
     individual: IndividualCreate
     # individual: Union[IndividualCreate, None]
 
@@ -111,16 +123,18 @@ class CustomerCreate(BaseModel):
 class CustomerUpdate(BaseModel):
     id: int
 
+
 class Customer(BaseModel):
     id: int
     photo: str
     user_type: int
-    
+
     class Config:
         orm_mode = True
 
-class Individual(IndividualCreate): 
-    id:int
+
+class Individual(IndividualCreate):
+    id: int
     employer: Employer
     address: Address
     email_addresses: list[EmailAddress]
@@ -133,7 +147,7 @@ class Individual(IndividualCreate):
     @validator("marrital_status_string", always=True)
     def marital_status_string(cls, v, values, **kwargs):
         return f"{get_marital_status_string(values['marrital_status'])}"
-    
+
     @validator("occupation_status_str", always=True)
     def occupation_status_string(cls, v, values, **kwargs):
         return f"{get_occupation_status_string(values['occupation_status'])}"
@@ -141,7 +155,34 @@ class Individual(IndividualCreate):
     @validator("gender_str", always=True)
     def gender_string(cls, v, values, **kwargs):
         return f"{get_gender_string(values['gender'])}"
-    
+
     class Config:
         orm_mode = True
 
+
+class BussinessCreate(BaseModel):
+    customer_id: Union[int, None]
+    name: str
+    business_type: int
+    business_number: str
+    business_email: str
+
+
+class BussinessUpdate(BussinessCreate):
+    id: int
+
+
+class BussinessCustomerCreate(CustomerBase):
+    business: BussinessCreate
+
+
+class Business(BussinessCreate):
+    customer: Customer
+    business_type_str: str = None
+
+    @validator("business_type_str", always=True)
+    def business_type_string(cls, v, values, **kwargs):
+        return f"{get_business_type_string(values['business_type'])}"
+
+    class Config:
+        orm_mode = True
