@@ -11,8 +11,8 @@ class EmployerCreate(BaseModel):
     individual_id: Union[int, None]
 
 
-class EmployerUpdate(BaseModel):
-    pass
+class EmployerUpdate(EmployerCreate):
+    id: int
 
 class Employer(EmployerCreate):
     id:int

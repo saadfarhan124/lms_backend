@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from typing import List
-from app.schemas import CustomerCreate, Customer, Individual
+from app.schemas import CustomerCreate, Customer, Individual, AddressUpdate, EmployerUpdate
 from app.database.database import get_db
 from app.utils import customer as customer_crud, email_address_crud, employer_crud, address_crud, mobile_number_crud, individual_crud
 from app.constants import CustomerType
@@ -40,15 +40,22 @@ def get_individual_customer(user_id: int, db: Session = Depends(get_db)):
     return individual_crud.get(db, id=user_id)
 
 # Get All Customers Individual
-
-
 @router.get("/customers/individual/{offset}/{limit}", response_model=List[Individual])
 def get_all_individual_customers(offset: int, limit: int, db: Session = Depends(get_db)):
     return individual_crud.get_multi(db, offset=offset, limit=limit)
 
-    # Update Address
-    # Update Employer
-    # Create Customer Business
+# Update Address
+@router.put("/customers/individual/address")
+def update_customer_address(address: AddressUpdate, db:Session = Depends(get_db)):
+    address_obj = address_crud.get(db, id=address.id)
+    return address_crud.update(db, db_obj=address_obj, update_schema=address)
+    
+# Update Employer
+@router.put("/customers/individual/employer")
+def update_customer_individual(employer: EmployerUpdate, db:Session = Depends(get_db)):
+    employer_obj = employer_crud.get(db, id=employer.id)
+    return employer_crud.update(db, db_obj=employer_obj, update_schema=employer)
+# Create Customer Business
     # Get Customer Business By ID
     # Get All Customers Business
 
