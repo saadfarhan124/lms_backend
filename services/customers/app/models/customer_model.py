@@ -1,8 +1,7 @@
-from sqlalchemy import Boolean, Column, String, ForeignKey, Integer, Date
+from sqlalchemy import Table, Column, String, ForeignKey, Integer, Date
 from sqlalchemy.orm import relationship
-from enum import Enum
 from app.database.database import Base
-from app.constants import CustomerType, BusinessType, Gender, MaritalStatus, OccupationStatus
+from app.constants import CustomerType, CoBorrowerType, BusinessType, Gender, MaritalStatus, OccupationStatus
 
 
 class Customer(Base):
@@ -12,6 +11,8 @@ class Customer(Base):
     user_type = Column(Integer, default=CustomerType.INDIVIDUAL)
     individual = relationship("Individual", back_populates="customer")
     business = relationship("Business", back_populates="customer")
+    co_borrowers = relationship("CoBorrowers", secondary="customer_coborrower", back_populates="customers")
+
 
 
 class Individual(Base):
@@ -90,3 +91,68 @@ class Business(Base):
 
     customer_id = Column(Integer, ForeignKey("customers.id"), unique=True, nullable=False)
     customer = relationship("Customer", back_populates="business")
+
+
+class CoBorrowers(Base):
+    __tablename__ = "co_borrowers"
+    id = Column(Integer, primary_key=True)
+    type = Column(Integer, default=CoBorrowerType.INDIVIDUAL.value)
+    individual = relationship("CoBorrowerIndividual", back_populates="co_borrower")
+    business = relationship("CoBorrowerBusiness", back_populates="co_borrower")
+    customers = relationship("Customer", secondary="customer_coborrower", back_populates="co_borrowers")
+
+
+class CoBorrowerIndividual(Base):
+    __tablename__ = "co_borrower_individuals"
+    id = Column(Integer, primary_key=True)
+    first_name = Column(String, nullable=False)
+    middle_name = Column(String)
+    last_name = Column(String, nullable= False)
+    date_of_birth = Column(Date, nullable=False)
+    mobile_number = Column(String)
+    email = Column(String)
+    co_borrower_id = Column(Integer, ForeignKey("co_borrowers.id"), unique=True, nullable=False)
+    co_borrower = relationship("CoBorrowers", back_populates="individual")
+    employer = relationship("CoBorrowerEmployer", uselist=False,
+                            back_populates="co_borrower")
+    address = relationship("CoBorrowerAddress", uselist=False,
+                           back_populates="co_borrower")
+
+class CoBorrowerAddress(Base):
+    __tablename__ = "co_borrower_addresses"
+    id = Column(Integer, primary_key=True)
+    street_name = Column(String)
+    village = Column(String)
+    district = Column(String)
+    nearest_landmark = Column(String)
+    country = Column(String)
+    co_borrower_id = Column(Integer, ForeignKey('co_borrower_individuals.id'), unique=True, nullable=False)
+    co_borrower = relationship("CoBorrowerIndividual", back_populates="address")
+
+class CoBorrowerEmployer(Base):
+    __tablename__ = "co_borrower_employers"
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    address = Column(String)
+    email = Column(String)
+    number = Column(String)
+    co_borrower_id = Column(Integer, ForeignKey("co_borrower_individuals.id"), unique=True, nullable=False)
+    co_borrower = relationship("CoBorrowerIndividual", back_populates="employer")
+
+class CoBorrowerBusiness(Base):
+    __tablename__ = "co_borrower_business"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    business_type = Column(Integer, default=BusinessType.CORPORATION)
+    business_number = Column(String)
+    business_email = Column(String)
+    co_borrower_id = Column(Integer, ForeignKey("co_borrowers.id"), unique=True, nullable=False)
+    co_borrower = relationship("CoBorrowers", back_populates="business")
+
+
+customer_coborrower = Table(
+    "customer_coborrower",
+    Base.metadata,
+    Column("customer_id", Integer, ForeignKey("customers.id")),
+    Column("coborrower_id", Integer, ForeignKey("co_borrowers.id"))
+)

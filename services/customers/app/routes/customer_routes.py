@@ -10,15 +10,16 @@ router = APIRouter()
 
 @router.post("/customers/individual", response_model=Individual)
 def create_individual_customer(customer: CustomerCreate, db: Session = Depends(get_db)):
+    
     cust_obj = customer_crud.create(db, create_schema=customer)
     customer.individual.customer_id = cust_obj.id
     individual_obj = individual_crud.create(
         db, create_schema=customer.individual)
     customer.individual.employer.individual_id = individual_obj.id
-    employer_obj = employer_crud.create(
+    employer_crud.create(
         db, create_schema=customer.individual.employer)
     customer.individual.address.individual_id = individual_obj.id
-    address_obj = address_crud.create(
+    address_crud.create(
         db, create_schema=customer.individual.address)
     mobile_numbers, email_addresses = [], []
     for email_address in customer.individual.email_addresses:
@@ -75,7 +76,7 @@ def get_all_businesses(offset: int, limit: int, db: Session= Depends(get_db)):
 # Update Business
 @router.put("/customers/business")
 def update_business(business: BussinessUpdate, db: Session = Depends(get_db)):
-    business_obj = bussiness_crud.get(db, id=business.id)
+    business_obj = bussiness_crud.get(db, wid=business.id)
     return bussiness_crud.update(db, db_obj=business_obj, update_schema=business
                                  )
 # Delete Customer Individual

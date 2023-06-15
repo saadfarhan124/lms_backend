@@ -1,7 +1,7 @@
 from pydantic import BaseModel, validator
 from typing import Union
 from datetime import date
-from app.constants import get_marital_status_string, get_business_type_string, get_gender_string, get_occupation_status_string
+from app.constants import CustomerType, get_marital_status_string, get_business_type_string, get_gender_string, get_occupation_status_string
 
 
 class EmployerCreate(BaseModel):
@@ -112,12 +112,11 @@ class IndividualUpdate(BaseModel):
 
 class CustomerBase(BaseModel):
     photo: str
-    user_type: int
+    user_type: int = CustomerType.INDIVIDUAL.value
 
 
-class CustomerCreate(BaseModel):
+class CustomerCreate(CustomerBase):
     individual: IndividualCreate
-    # individual: Union[IndividualCreate, None]
 
 
 class CustomerUpdate(BaseModel):
@@ -173,6 +172,7 @@ class BussinessUpdate(BussinessCreate):
 
 
 class BussinessCustomerCreate(CustomerBase):
+    user_type: int = CustomerType.BUSINESS.value
     business: BussinessCreate
 
 
