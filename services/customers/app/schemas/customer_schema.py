@@ -1,6 +1,6 @@
 from pydantic import BaseModel, validator
 from typing import Union
-from datetime import date
+from datetime import date, datetime
 from app.constants import CustomerType, get_marital_status_string, get_business_type_string, get_gender_string, get_occupation_status_string
 
 
@@ -142,6 +142,7 @@ class Individual(IndividualCreate):
     marrital_status_string: str = None
     occupation_status_str: str = None
     gender_str: str = None
+    formatted_date_str: str = None
 
     @validator("marrital_status_string", always=True)
     def marital_status_string(cls, v, values, **kwargs):
@@ -154,6 +155,24 @@ class Individual(IndividualCreate):
     @validator("gender_str", always=True)
     def gender_string(cls, v, values, **kwargs):
         return f"{get_gender_string(values['gender'])}"
+
+    @validator("formatted_date_str", always=True)
+    def get_formatted_date(cls, v, values, **kwargs):
+        date_of_birth = values["date_of_birth"]  # Assuming the date_of_birth value is a string
+        # Determine the day suffix
+        day = date_of_birth.day
+        if day in (1, 21, 31):
+            suffix = "st"
+        elif day in (2, 22):
+            suffix = "nd"
+        elif day in (3, 23):
+            suffix = "rd"
+        else:
+            suffix = "th"
+
+        # # Format the date
+        formatted_date = date_of_birth.strftime(f"%d{suffix} %b, %Y")
+        return f"{formatted_date}"
 
     class Config:
         orm_mode = True

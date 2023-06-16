@@ -32,7 +32,7 @@ def create_individual_customer(customer: CustomerCreate, db: Session = Depends(g
             db, create_schema=mobile_number))
     return individual_obj
 
-
+# Get Customer Individual By ID
 @router.get("/customers/individual/{user_id}", response_model=Individual)
 def get_individual_customer(user_id: int, db: Session = Depends(get_db)):
     return individual_crud.get(db, id=user_id)
@@ -79,5 +79,7 @@ def update_business(business: BussinessUpdate, db: Session = Depends(get_db)):
     business_obj = bussiness_crud.get(db, wid=business.id)
     return bussiness_crud.update(db, db_obj=business_obj, update_schema=business
                                  )
+
+# Update Customer Individual
 # Delete Customer Individual
 # Delete Customer Business
