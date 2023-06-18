@@ -11,7 +11,7 @@ router = APIRouter()
 
 @router.post("/customers/individual", response_model=Individual)
 def create_individual_customer(customer: CustomerCreate, db: Session = Depends(get_db)):
-    
+
     cust_obj = customer_crud.create(db, create_schema=customer)
     customer.individual.customer_id = cust_obj.id
     individual_obj = individual_crud.create(
@@ -34,41 +34,54 @@ def create_individual_customer(customer: CustomerCreate, db: Session = Depends(g
     return individual_obj
 
 # Get Customer Individual By ID
+
+
 @router.get("/customers/individual/{user_id}", response_model=Individual)
 def get_individual_customer(user_id: int, db: Session = Depends(get_db)):
     return individual_crud.get(db, id=user_id)
 
 # Get All Customers Individual
+
+
 @router.get("/customers/individual/{offset}/{limit}", response_model=IndividualList)
 def get_all_individual_customers(offset: int, limit: int, db: Session = Depends(get_db)):
     return IndividualList(customers=individual_crud.get_multi(db, offset=offset, limit=limit), count=individual_crud.get_count(db))
 
 # Update Customer Personal Informatin
-@router.put("/customers/individual")
-def update_business(individual: IndividualUpdate, db: Session = Depends(get_db)):
-    individual_obj = individual_crud.get(db, id=individual.id)
-    # TO DO Configure remove email address and mobile number case
+
+
+@router.put("/customers/individual", response_model=Individual)
+def update_individual(individual: IndividualUpdate, db: Session = Depends(get_db)):
     for email in individual.email_addresses:
         email_obj = email_address_crud.get(db=db, id=email.id)
         email_address_crud.update(db, db_obj=email_obj, update_schema=email)
     for number in individual.mobile_numbers:
         number_obj = mobile_number_crud.get(db=db, id=number.id)
         mobile_number_crud.update(db, db_obj=number_obj, update_schema=number)
-    return bussiness_crud.update(db, db_obj=individual_obj, update_schema=individual)
+    individual_obj = individual_crud.get(db, id=individual.id)
+    # TO DO Configure remove email address and mobile number case
+
+    return individual_crud.update(db, db_obj=individual_obj, update_schema=individual)
 
 # Update Address
+
+
 @router.put("/customers/individual/address")
-def update_customer_address(address: AddressUpdate, db:Session = Depends(get_db)):
+def update_customer_address(address: AddressUpdate, db: Session = Depends(get_db)):
     address_obj = address_crud.get(db, id=address.id)
     return address_crud.update(db, db_obj=address_obj, update_schema=address)
-    
+
 # Update Employer
+
+
 @router.put("/customers/individual/employer")
-def update_customer_individual(employer: EmployerUpdate, db:Session = Depends(get_db)):
+def update_customer_individual(employer: EmployerUpdate, db: Session = Depends(get_db)):
     employer_obj = employer_crud.get(db, id=employer.id)
     return employer_crud.update(db, db_obj=employer_obj, update_schema=employer)
-    
+
 # Create Customer Business
+
+
 @router.post("/customers/business", response_model=Business)
 def create_customer_business(customer: BussinessCustomerCreate, db: Session = Depends(get_db)):
     cust_obj = customer_crud.create(db, create_schema=customer)
@@ -80,14 +93,18 @@ def create_customer_business(customer: BussinessCustomerCreate, db: Session = De
 # Get Customer Business By ID
 @router.get("/customers/business/{id}", response_model=Business)
 def get_business_by_id(id: int, db: Session = Depends(get_db)):
-    return  bussiness_crud.get(db, id=id)
+    return bussiness_crud.get(db, id=id)
 
 # Get All Customers Business
+
+
 @router.get("/customers/business/{offset}/{limit}", response_model=BusinessList)
-def get_all_businesses(offset: int, limit: int, db: Session= Depends(get_db)):
+def get_all_businesses(offset: int, limit: int, db: Session = Depends(get_db)):
     return BusinessList(customers=bussiness_crud.get_multi(db, offset=offset, limit=limit), count=bussiness_crud.get_count(db=db))
 
 # Update Business
+
+
 @router.put("/customers/business")
 def update_business(business: BussinessUpdate, db: Session = Depends(get_db)):
     business_obj = bussiness_crud.get(db, id=business.id)
@@ -99,7 +116,7 @@ def update_business(business: BussinessUpdate, db: Session = Depends(get_db)):
 # Delete Customer Business
 
 
-# Utils 
+# Utils
 @router.get("/customers/business-types")
 def get_business_types():
     business_types = [
@@ -107,6 +124,7 @@ def get_business_types():
         for bt in BusinessType
     ]
     return {"data": business_types}
+
 
 @router.get("/customers/marital-status")
 def get_marital_status():
@@ -124,7 +142,6 @@ def get_occupation_status():
         for bt in OccupationStatus
     ]
     return {"data": occupation_status}
-
 
 
 @router.get("/customers/gender-options")
