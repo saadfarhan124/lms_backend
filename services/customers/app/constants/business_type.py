@@ -6,7 +6,7 @@ class BusinessType(Enum):
     CORPORATION = 3
     LLC = 4
 
-def get_business_type_string(business_type: BusinessType) -> str:
+def get_business_type_string(business_type: int) -> str:
     if business_type == BusinessType.SOLE_PROPRIETORSHIP.value:
         return "Sole Proprietorship"
     elif business_type == BusinessType.PARTNERSHIP.value:

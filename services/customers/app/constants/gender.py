@@ -5,7 +5,7 @@ class Gender(Enum):
     Female = 2
     Other = 3
 
-def get_gender_string(gender: Gender) -> str:
+def get_gender_string(gender: int) -> str:
     if gender == Gender.Male.value:
         return "Male"
     elif gender == Gender.Female.value:

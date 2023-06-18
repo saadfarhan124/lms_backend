@@ -17,7 +17,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         return db.query(self.model).get(id)
     
     def get_multi(self, db:Session, *, offset:int = 0, limit:int = 10) -> List[ModelType]:
-        return db.query(self.model).offset(offset).limit(limit).all()
+        return db.query(self.model).order_by(self.model.id.desc()).offset(offset).limit(limit).all()
         
     def create(self, db:Session, *, create_schema: CreateSchemaType) -> ModelType:
         create_obj = jsonable_encoder(create_schema)
@@ -47,3 +47,6 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         db.delete(obj)
         db.commit()
         return obj
+    
+    def get_count(self, db:Session) -> int:
+        return db.query(self.model).count()

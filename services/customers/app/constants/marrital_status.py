@@ -6,7 +6,7 @@ class MaritalStatus(Enum):
     WIDOWED = 4
 
 
-def get_marital_status_string(marital_status: MaritalStatus) -> str:
+def get_marital_status_string(marital_status: int) -> str:
     if marital_status == MaritalStatus.SINGLE.value:
         return "Single"
     elif marital_status == MaritalStatus.MARRIED.value:

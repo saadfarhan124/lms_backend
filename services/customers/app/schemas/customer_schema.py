@@ -1,5 +1,5 @@
 from pydantic import BaseModel, validator
-from typing import Union
+from typing import Union, List
 from datetime import date, datetime
 from app.constants import CustomerType, get_marital_status_string, get_business_type_string, get_gender_string, get_occupation_status_string
 
@@ -48,8 +48,8 @@ class MobileNumberCreate(BaseModel):
     individual_id: Union[int, None]
 
 
-class MobileNumberUpdate(BaseModel):
-    pass
+class MobileNumberUpdate(MobileNumberCreate):
+    id: int
 
 
 class MobileNumber(MobileNumberCreate):
@@ -64,8 +64,8 @@ class EmailAddressCreate(BaseModel):
     individual_id: Union[int, None]
 
 
-class EmailAddressUpdate(BaseModel):
-    pass
+class EmailAddressUpdate(EmailAddressCreate):
+    id: int
 
 
 class EmailAddress(EmailAddressCreate):
@@ -106,8 +106,12 @@ class IndividualCreate(BaseModel):
         return mobile_numbers
 
 
-class IndividualUpdate(BaseModel):
-    pass
+class IndividualUpdate(IndividualCreate):
+    id: int
+    employer: Union[EmployerCreate, None]
+    address: Union[AddressCreate, None]
+    email_addresses: List[EmailAddressUpdate]
+    mobile_numbers: List[MobileNumberUpdate]
 
 
 class CustomerBase(BaseModel):
@@ -177,6 +181,9 @@ class Individual(IndividualCreate):
     class Config:
         orm_mode = True
 
+class IndividualList(BaseModel):
+    customers: List[Individual]
+    count: int
 
 class BussinessCreate(BaseModel):
     customer_id: Union[int, None]
@@ -196,6 +203,7 @@ class BussinessCustomerCreate(CustomerBase):
 
 
 class Business(BussinessCreate):
+    id: int
     customer: Customer
     business_type_str: str = None
 
@@ -205,3 +213,8 @@ class Business(BussinessCreate):
 
     class Config:
         orm_mode = True
+
+
+class BusinessList(BaseModel):
+    customers: List[Business]
+    count: int

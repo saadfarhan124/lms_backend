@@ -4,7 +4,7 @@ class OccupationStatus(Enum):
     SELF_EMPLOYED = 2
     UNEMPLOYED = 3
 
-def get_occupation_status_string(occupation_status: OccupationStatus) -> str:
+def get_occupation_status_string(occupation_status: int) -> str:
     if occupation_status == OccupationStatus.EMPLOYED.value:
         return "Employed"
     elif occupation_status == OccupationStatus.SELF_EMPLOYED.value:
