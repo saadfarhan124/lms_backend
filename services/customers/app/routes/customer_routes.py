@@ -54,12 +54,14 @@ def get_all_individual_customers(offset: int, limit: int, db: Session = Depends(
 
 @router.put("/customers/individual", response_model=Individual)
 def update_individual(individual: IndividualUpdate, db: Session = Depends(get_db)):
-    for email in individual.email_addresses:
-        email_obj = email_address_crud.get(db=db, id=email.id)
-        email_address_crud.update(db, db_obj=email_obj, update_schema=email)
+    for email in individual.email_addresses:        
+        if email.id is None:
+            email.individual_id = individual.id
+            email_address_crud.create(db, create_schema=email)
     for number in individual.mobile_numbers:
-        number_obj = mobile_number_crud.get(db=db, id=number.id)
-        mobile_number_crud.update(db, db_obj=number_obj, update_schema=number)
+        if number.id is None:
+            number.individual_id = individual.id
+            mobile_number_crud.create(db, create_schema=number)
     individual_obj = individual_crud.get(db, id=individual.id)
     # TO DO Configure remove and add new email address and mobile number case
 

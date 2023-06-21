@@ -49,7 +49,8 @@ class MobileNumberCreate(BaseModel):
 
 
 class MobileNumberUpdate(MobileNumberCreate):
-    id: int
+    id: Union[int, None]
+
 
 class MobileNumberDelete(MobileNumberUpdate):
     pass
@@ -68,7 +69,7 @@ class EmailAddressCreate(BaseModel):
 
 
 class EmailAddressUpdate(EmailAddressCreate):
-    id: int
+    id: Union[int, None]
 
 class EmailAddressDelete(EmailAddressUpdate):
     pass
