@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.routes.api import api_router
 
-from app.models import Customer
+import app.models
 
 # from .routes import example_routes
 

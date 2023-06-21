@@ -5,3 +5,4 @@ from .customer_model import Address
 from .customer_model import MobileNumber
 from .customer_model import EmailAddress
 from .customer_model import Business
+from .loan_application_model import Guarantor
