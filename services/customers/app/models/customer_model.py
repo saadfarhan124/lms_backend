@@ -1,7 +1,8 @@
-from sqlalchemy import Column, String, ForeignKey, Integer, Date
+from sqlalchemy import Column, String, ForeignKey, Integer, Date, DateTime
 from sqlalchemy.orm import relationship
 from app.database.database import Base
 from app.constants import CustomerType, BusinessType, Gender, MaritalStatus, OccupationStatus
+from sqlalchemy.sql import func
 
 
 class Customer(Base):
@@ -11,8 +12,10 @@ class Customer(Base):
     user_type = Column(Integer, default=CustomerType.INDIVIDUAL)
     individual = relationship("Individual", back_populates="customer")
     business = relationship("Business", back_populates="customer")
-    # co_borrowers = relationship(
-    #     "CoBorrowers", secondary="customer_coborrower", back_populates="customers")
+    time_created = Column(DateTime(timezone=True),
+                             server_default=func.now(), nullable=False)
+    time_updated = Column(DateTime(
+        timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
 
 class Individual(Base):
@@ -26,6 +29,10 @@ class Individual(Base):
     marrital_status = Column(Integer, default=MaritalStatus.SINGLE)
     occupation_status = Column(Integer, default=OccupationStatus.EMPLOYED)
     gender = Column(Integer, default=Gender.Male)
+    time_created = Column(DateTime(timezone=True),
+                             server_default=func.now(), nullable=False)
+    time_updated = Column(DateTime(
+        timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     customer_id = Column(Integer, ForeignKey(
         "customers.id"), unique=True, nullable=False)
@@ -46,6 +53,10 @@ class Employer(Base):
     address = Column(String)
     email = Column(String)
     number = Column(String)
+    time_created = Column(DateTime(timezone=True),
+                             server_default=func.now(), nullable=False)
+    time_updated = Column(DateTime(
+        timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     individual_id = Column(Integer, ForeignKey(
         "individuals.id"), unique=True, nullable=False)
@@ -60,6 +71,10 @@ class Address(Base):
     district = Column(String, nullable=False)
     nearest_landmark = Column(String, nullable=False)
     country = Column(String, nullable=False)
+    time_created = Column(DateTime(timezone=True),
+                             server_default=func.now(), nullable=False)
+    time_updated = Column(DateTime(
+        timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     individual_id = Column(Integer, ForeignKey(
         "individuals.id"), unique=True, nullable=False)
@@ -70,6 +85,10 @@ class MobileNumber(Base):
     __tablename__ = "mobile_numbers"
     id = Column(Integer, primary_key=True)
     number = Column(String)
+    time_created = Column(DateTime(timezone=True),
+                             server_default=func.now(), nullable=False)
+    time_updated = Column(DateTime(
+        timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     individual_id = Column(Integer, ForeignKey(
         "individuals.id"), nullable=False)
@@ -80,6 +99,10 @@ class EmailAddress(Base):
     __tablename__ = "email_addresses"
     id = Column(Integer, primary_key=True)
     email = Column(String)
+    time_created = Column(DateTime(timezone=True),
+                             server_default=func.now(), nullable=False)
+    time_updated = Column(DateTime(
+        timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     individual_id = Column(Integer, ForeignKey(
         "individuals.id"), nullable=False)
@@ -93,83 +116,12 @@ class Business(Base):
     business_type = Column(Integer, default=BusinessType.CORPORATION)
     business_number = Column(String)
     business_email = Column(String)
+    time_created = Column(DateTime(timezone=True),
+                             server_default=func.now(), nullable=False)
+    time_updated = Column(DateTime(
+        timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     customer_id = Column(Integer, ForeignKey(
         "customers.id"), unique=True, nullable=False)
     customer = relationship("Customer", back_populates="business")
 
-
-# class CoBorrowers(Base):
-#     __tablename__ = "co_borrowers"
-#     id = Column(Integer, primary_key=True)
-#     type = Column(Integer, default=CoBorrowerType.INDIVIDUAL.value)
-#     individual = relationship("CoBorrowerIndividual",
-#                               back_populates="co_borrower")
-#     business = relationship("CoBorrowerBusiness", back_populates="co_borrower")
-#     customers = relationship(
-#         "Customer", secondary="customer_coborrower", back_populates="co_borrowers")
-
-
-# class CoBorrowerIndividual(Base):
-#     __tablename__ = "co_borrower_individuals"
-#     id = Column(Integer, primary_key=True)
-#     first_name = Column(String, nullable=False)
-#     middle_name = Column(String)
-#     last_name = Column(String, nullable=False)
-#     date_of_birth = Column(Date, nullable=False)
-#     mobile_number = Column(String)
-#     email = Column(String)
-#     co_borrower_id = Column(Integer, ForeignKey(
-#         "co_borrowers.id"), unique=True, nullable=False)
-#     co_borrower = relationship("CoBorrowers", back_populates="individual")
-#     employer = relationship("CoBorrowerEmployer", uselist=False,
-#                             back_populates="co_borrower")
-#     address = relationship("CoBorrowerAddress", uselist=False,
-#                            back_populates="co_borrower")
-
-
-# class CoBorrowerAddress(Base):
-#     __tablename__ = "co_borrower_addresses"
-#     id = Column(Integer, primary_key=True)
-#     street_name = Column(String)
-#     village = Column(String)
-#     district = Column(String)
-#     nearest_landmark = Column(String)
-#     country = Column(String)
-#     co_borrower_id = Column(Integer, ForeignKey(
-#         'co_borrower_individuals.id'), unique=True, nullable=False)
-#     co_borrower = relationship(
-#         "CoBorrowerIndividual", back_populates="address")
-
-
-# class CoBorrowerEmployer(Base):
-#     __tablename__ = "co_borrower_employers"
-#     id = Column(Integer, primary_key=True)
-#     name = Column(String)
-#     address = Column(String)
-#     email = Column(String)
-#     number = Column(String)
-#     co_borrower_id = Column(Integer, ForeignKey(
-#         "co_borrower_individuals.id"), unique=True, nullable=False)
-#     co_borrower = relationship(
-#         "CoBorrowerIndividual", back_populates="employer")
-
-
-# class CoBorrowerBusiness(Base):
-#     __tablename__ = "co_borrower_business"
-#     id = Column(Integer, primary_key=True)
-#     name = Column(String, nullable=False)
-#     business_type = Column(Integer, default=BusinessType.CORPORATION)
-#     business_number = Column(String)
-#     business_email = Column(String)
-#     co_borrower_id = Column(Integer, ForeignKey(
-#         "co_borrowers.id"), unique=True, nullable=False)
-#     co_borrower = relationship("CoBorrowers", back_populates="business")
-
-
-# customer_coborrower = Table(
-#     "customer_coborrower",
-#     Base.metadata,
-#     Column("customer_id", Integer, ForeignKey("customers.id")),
-#     Column("coborrower_id", Integer, ForeignKey("co_borrowers.id"))
-# )
