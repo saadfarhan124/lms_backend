@@ -51,6 +51,9 @@ class MobileNumberCreate(BaseModel):
 class MobileNumberUpdate(MobileNumberCreate):
     id: int
 
+class MobileNumberDelete(MobileNumberUpdate):
+    pass
+
 
 class MobileNumber(MobileNumberCreate):
     id: int
@@ -66,6 +69,9 @@ class EmailAddressCreate(BaseModel):
 
 class EmailAddressUpdate(EmailAddressCreate):
     id: int
+
+class EmailAddressDelete(EmailAddressUpdate):
+    pass
 
 
 class EmailAddress(EmailAddressCreate):

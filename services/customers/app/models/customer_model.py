@@ -1,7 +1,7 @@
-from sqlalchemy import Table, Column, String, ForeignKey, Integer, Date
+from sqlalchemy import Column, String, ForeignKey, Integer, Date
 from sqlalchemy.orm import relationship
 from app.database.database import Base
-from app.constants import CustomerType, CoBorrowerType, BusinessType, Gender, MaritalStatus, OccupationStatus
+from app.constants import CustomerType, BusinessType, Gender, MaritalStatus, OccupationStatus
 
 
 class Customer(Base):

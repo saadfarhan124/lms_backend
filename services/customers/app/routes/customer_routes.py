@@ -1,7 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from typing import List
-from app.schemas import CustomerCreate, Individual, IndividualList, IndividualUpdate, AddressUpdate, EmployerUpdate, BussinessCustomerCreate, Business, BussinessUpdate, BusinessList
+from app.schemas import CustomerCreate, Individual, IndividualList, IndividualUpdate, AddressUpdate, EmployerUpdate
+from app.schemas import BussinessCustomerCreate, Business, BussinessUpdate, BusinessList
+from app.schemas import EmailAddressDelete
 from app.database.database import get_db
 from app.utils import customer as customer_crud, email_address_crud, employer_crud, address_crud, mobile_number_crud, individual_crud, bussiness_crud
 from app.constants import BusinessType, get_business_type_string, OccupationStatus, get_occupation_status_string, MaritalStatus, get_marital_status_string, Gender, get_gender_string
@@ -59,7 +61,7 @@ def update_individual(individual: IndividualUpdate, db: Session = Depends(get_db
         number_obj = mobile_number_crud.get(db=db, id=number.id)
         mobile_number_crud.update(db, db_obj=number_obj, update_schema=number)
     individual_obj = individual_crud.get(db, id=individual.id)
-    # TO DO Configure remove email address and mobile number case
+    # TO DO Configure remove and add new email address and mobile number case
 
     return individual_crud.update(db, db_obj=individual_obj, update_schema=individual)
 
@@ -78,6 +80,13 @@ def update_customer_address(address: AddressUpdate, db: Session = Depends(get_db
 def update_customer_individual(employer: EmployerUpdate, db: Session = Depends(get_db)):
     employer_obj = employer_crud.get(db, id=employer.id)
     return employer_crud.update(db, db_obj=employer_obj, update_schema=employer)
+
+
+# Delete Email Address
+@router.delete("/customers/email_address")
+def delete_email_address(email_address: EmailAddressDelete, db: Session = Depends(get_db)):
+    return email_address_crud.remove(db, id=email_address.id)
+
 
 # Create Customer Business
 
@@ -111,7 +120,6 @@ def update_business(business: BussinessUpdate, db: Session = Depends(get_db)):
     return bussiness_crud.update(db, db_obj=business_obj, update_schema=business
                                  )
 
-# Update Customer Individual
 # Delete Customer Individual
 # Delete Customer Business
 
