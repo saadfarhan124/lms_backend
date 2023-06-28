@@ -13,7 +13,7 @@ router = APIRouter()
 
 @router.post("/customers/individual", response_model=Individual)
 def create_individual_customer(customer: CustomerCreate, db: Session = Depends(get_db)):
-
+    # TO DO Proof of identification
     cust_obj = customer_crud.create(db, create_schema=customer)
     customer.individual.customer_id = cust_obj.id
     individual_obj = individual_crud.create(
