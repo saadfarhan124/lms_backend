@@ -2,7 +2,7 @@ from app.database.database import Base
 from sqlalchemy import Column, String, DateTime, Integer, Date, DECIMAL, Table, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from app.constants import TermModes, LoanStatus
+from app.constants import TermModes, LoanStatus, LoanType
 
 
 loan_application_guarantors = Table('loan_application_guarantors', Base.metadata,
@@ -54,6 +54,8 @@ class LoanApplication(Base):
     term = Column(Integer, default=TermModes
                   .DAYS.value)
     status = Column(Integer, nullable=False, default= LoanStatus.UNAPPROVED.value)
+    loan_type = Column(Integer, nullable=False, default= LoanType.PERSONAL.value)
+
     term = Column(Integer, nullable=False)
     time_created = Column(DateTime(timezone=True),
                           server_default=func.now(), nullable=False)
