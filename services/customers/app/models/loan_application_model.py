@@ -50,3 +50,8 @@ loan_application_customers = Table('loan_application_customers', Base.metadata,
                                    Column("loan_application_id", Integer,
                                           ForeignKey('loan_applications.id')),
                                    Column('customer_id', Integer, ForeignKey('customers.id')))
+
+loan_application_co_borrowers = Table('loan_application_co_borrowers', Base.metadata,
+                                   Column("loan_application_id", Integer,
+                                          ForeignKey('loan_applications.id')),
+                                   Column('customer_id', Integer, ForeignKey('customers.id')))
