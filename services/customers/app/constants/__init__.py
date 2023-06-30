@@ -5,3 +5,5 @@ from .business_type import BusinessType, get_business_type_enum, get_business_ty
 from .occupation_status import OccupationStatus, get_occupation_status_enum, get_occupation_status_string
 from .co_borrower_type import CoBorrowerType
 from .term_modes import TermModes, get_term_modes_string, get_term_type_enum
+from .mode_of_payments import ModeOfPayments, get_mode_of_payments_string, get_mode_of_payment_enum
+from .loan_status import LoanStatus, get_loan_status_string, get_loan_status_enum
