@@ -40,6 +40,13 @@ class LoanApplication(Base):
 
 
 loan_application_guarantors = Table('loan_application_guarantors', Base.metadata,
-    Column('loan_applications', Integer, ForeignKey('loan_applications.id')),
-    Column('guarantors', Integer, ForeignKey('guarantors.id'))
-)
+                                    Column('loan_application_id', Integer,
+                                           ForeignKey('loan_applications.id')),
+                                    Column('guarantor_id', Integer,
+                                           ForeignKey('guarantors.id'))
+                                    )
+
+loan_application_customers = Table('loan_application_customers', Base.metadata,
+                                   Column("loan_application_id", Integer,
+                                          ForeignKey('loan_applications.id')),
+                                   Column('customer_id', Integer, ForeignKey('customers.id')))
