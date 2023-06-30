@@ -5,6 +5,24 @@ from sqlalchemy.sql import func
 from app.constants import TermModes
 
 
+loan_application_guarantors = Table('loan_application_guarantors', Base.metadata,
+                                    Column('loan_application_id', Integer,
+                                           ForeignKey('loan_applications.id')),
+                                    Column('guarantor_id', Integer,
+                                           ForeignKey('guarantors.id'))
+                                    )
+
+loan_application_customers = Table('loan_application_customers', Base.metadata,
+                                   Column("loan_application_id", Integer,
+                                          ForeignKey('loan_applications.id')),
+                                   Column('customer_id', Integer, ForeignKey('customers.id')))
+
+loan_application_co_borrowers = Table('loan_application_co_borrowers', Base.metadata,
+                                      Column("loan_application_id", Integer,
+                                             ForeignKey('loan_applications.id')),
+                                      Column('customer_id', Integer, ForeignKey('customers.id')))
+
+
 class Guarantor(Base):
     __tablename__ = "guarantors"
     id = Column(Integer, primary_key=True)
@@ -21,6 +39,8 @@ class Guarantor(Base):
                           server_default=func.now(), nullable=False)
     time_updated = Column(DateTime(
         timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+    loan_applications = relationship(
+        "LoanApplication", secondary=loan_application_guarantors, back_populates="gurantors")
 
 
 class LoanApplication(Base):
@@ -29,6 +49,7 @@ class LoanApplication(Base):
     date_applied = Column(DateTime(timezone=True), nullable=False)
     principal_amount = Column(DECIMAL(scale=2), nullable=False)
     interest = Column(DECIMAL(scale=2), nullable=False)
+    o_and_s_rate = Column(DECIMAL(scale=2), nullable=False, default=10)
     length = Column(Integer, nullable=False)
     term = Column(Integer, default=TermModes
                   .DAYS.value)
@@ -38,20 +59,9 @@ class LoanApplication(Base):
     time_updated = Column(DateTime(
         timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
-
-loan_application_guarantors = Table('loan_application_guarantors', Base.metadata,
-                                    Column('loan_application_id', Integer,
-                                           ForeignKey('loan_applications.id')),
-                                    Column('guarantor_id', Integer,
-                                           ForeignKey('guarantors.id'))
-                                    )
-
-loan_application_customers = Table('loan_application_customers', Base.metadata,
-                                   Column("loan_application_id", Integer,
-                                          ForeignKey('loan_applications.id')),
-                                   Column('customer_id', Integer, ForeignKey('customers.id')))
-
-loan_application_co_borrowers = Table('loan_application_co_borrowers', Base.metadata,
-                                   Column("loan_application_id", Integer,
-                                          ForeignKey('loan_applications.id')),
-                                   Column('customer_id', Integer, ForeignKey('customers.id')))
+    guarantors = relationship(
+        "Guarantor", secondary=loan_application_guarantors, back_populates="loan_applications")
+    customers = relationship(
+        "Customer", secondary=loan_application_customers, back_populates="loan_applications")
+    co_borrowers = relationship(
+        "Customer", secondary=loan_application_co_borrowers, back_populates="loan_applications")
