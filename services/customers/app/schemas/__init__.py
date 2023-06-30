@@ -5,3 +5,6 @@ from .customer_schema import EmailAddressUpdate, EmailAddressCreate, EmailAddres
 from .customer_schema import MobileNumberCreate, MobileNumberUpdate, MobileNumberDelete
 from .customer_schema import Individual, IndividualCreate, IndividualUpdate, IndividualList
 from .customer_schema import BussinessCreate, BussinessCustomerCreate, BussinessUpdate, Business, BusinessList
+
+
+from .loan_application_schema import LoanApplicationCreate

@@ -33,3 +33,6 @@ def get_mode_of_payment_enum(marital_status: str) -> ModeOfPayments:
     elif marital_status.lower() == "other":
         return ModeOfPayments.OTHER
     raise ValueError("Invalid Mode of Payment string") 
+
+def is_valid_payment_mode(payment_mode: int):
+    return any(payment_mode == mode.value for mode in ModeOfPayments)

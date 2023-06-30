@@ -1,5 +1,5 @@
 from app.database.database import Base
-from sqlalchemy import Column, String, DateTime, Integer, Date, DECIMAL, Table, ForeignKey
+from sqlalchemy import Column, String, DateTime, Date, Integer, Date, DECIMAL, Table, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.constants import TermModes, LoanStatus, LoanType
@@ -47,15 +47,17 @@ class LoanApplication(Base):
     __tablename__ = "loan_applications"
     id = Column(Integer, primary_key=True)
     date_applied = Column(DateTime(timezone=True), nullable=False)
+    purpose = Column(String, nullable=False)
     principal_amount = Column(DECIMAL(scale=2), nullable=False)
-    interest = Column(DECIMAL(scale=2), nullable=False)
+    interest_rate = Column(DECIMAL(scale=2), nullable=False)
+    interest_rate_is_flat = Column(Boolean, default=False)
     o_and_s_rate = Column(DECIMAL(scale=2), nullable=False, default=10)
+    o_and_s_rate_is_flat = Column(Boolean, default=False)
     length = Column(Integer, nullable=False)
     term = Column(Integer, default=TermModes
                   .DAYS.value)
     status = Column(Integer, nullable=False, default= LoanStatus.UNAPPROVED.value)
     loan_type = Column(Integer, nullable=False, default= LoanType.PERSONAL.value)
-
     term = Column(Integer, nullable=False)
     time_created = Column(DateTime(timezone=True),
                           server_default=func.now(), nullable=False)
@@ -68,3 +70,14 @@ class LoanApplication(Base):
         "Customer", secondary=loan_application_customers, back_populates="loan_applications")
     co_borrowers = relationship(
         "Customer", secondary=loan_application_co_borrowers, back_populates="loan_applications")
+
+class LoanApplicationPaymentSchedule(Base):
+    __tablename__ = "loan_application_payment_schedule"
+    id = Column(Integer, primary_key=True)
+    payment_date = Column(Date, nullable=False)
+    
+
+    time_created = Column(DateTime(timezone=True),
+                             server_default=func.now(), nullable=False)
+    time_updated = Column(DateTime(
+        timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
