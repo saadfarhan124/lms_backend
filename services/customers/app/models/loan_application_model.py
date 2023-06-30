@@ -1,5 +1,5 @@
 from app.database.database import Base
-from sqlalchemy import Column, String, DateTime, Integer, Date, DECIMAL
+from sqlalchemy import Column, String, DateTime, Integer, Date, DECIMAL, Table, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.constants import TermModes
@@ -37,3 +37,9 @@ class LoanApplication(Base):
                           server_default=func.now(), nullable=False)
     time_updated = Column(DateTime(
         timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+
+loan_application_guarantors = Table('loan_application_guarantors', Base.metadata,
+    Column('loan_applications', Integer, ForeignKey('loan_applications.id')),
+    Column('guarantors', Integer, ForeignKey('guarantors.id'))
+)
