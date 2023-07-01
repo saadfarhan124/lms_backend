@@ -1,4 +1,3 @@
-from sqlalchemy.orm import Session
 
 from app.models import Customer, Individual, Employer, Address, MobileNumber, EmailAddress, Business
 from app.schemas import CustomerCreate, CustomerUpdate, EmployerCreate, EmployerUpdate, EmailAddressCreate, EmailAddressUpdate, AddressCreate, AddressUpdate, MobileNumberCreate, MobileNumberUpdate, IndividualUpdate, IndividualCreate, BussinessCreate, BussinessUpdate

@@ -12,6 +12,8 @@ class Customer(Base):
     user_type = Column(Integer, default=CustomerType.INDIVIDUAL)
     individual = relationship("Individual", back_populates="customer")
     business = relationship("Business", back_populates="customer")
+    loan_applications = relationship("LoanApplication", back_populates="customers")
+
     time_created = Column(DateTime(timezone=True),
                              server_default=func.now(), nullable=False)
     time_updated = Column(DateTime(

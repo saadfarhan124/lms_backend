@@ -6,3 +6,10 @@ from .customer_model import MobileNumber
 from .customer_model import EmailAddress
 from .customer_model import Business
 from .loan_application_model import Guarantor
+from .loan_application_model import LoanApplication
+from .loan_application_model import LoanApplicationPaymentSchedule
+from .loan_application_model import LoanApplicationCheques
+from .loan_application_model import Fees
+from .loan_application_model import PreDefinedFees
+
+
