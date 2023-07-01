@@ -19,16 +19,17 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     def get_multi(self, db:Session, *, offset:int = 0, limit:int = 10) -> List[ModelType]:
         return db.query(self.model).order_by(self.model.id.desc()).offset(offset).limit(limit).all()
         
-    def create(self, db:Session, *, create_schema: CreateSchemaType) -> ModelType:
+    def create(self, db:Session, *, create_schema: CreateSchemaType, commit: bool = True) -> ModelType:
         create_obj = jsonable_encoder(create_schema)
         relevant_keys = {k: v for k, v in create_obj.items() if k in self.model.__table__.columns}
         db_obj = self.model(**relevant_keys)
         db.add(db_obj)
-        db.commit()
+        if commit:
+            db.commit()
         db.refresh(db_obj)
         return db_obj
     
-    def update(self, db:Session, *, db_obj: ModelType, update_schema: Union[UpdateSchemaType, Dict[str, Any]]) -> ModelType:
+    def update(self, db:Session, *, db_obj: ModelType, update_schema: Union[UpdateSchemaType, Dict[str, Any]], commit: bool = True) -> ModelType:
         obj_data = jsonable_encoder(db_obj)
         if isinstance(update_schema, dict):
             update_data = update_schema
@@ -38,15 +39,20 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             if field in update_data:
                 setattr(db_obj, field, update_data[field])
         db.add(db_obj)
-        db.commit()
+        if commit:
+            db.commit()
         db.refresh(db_obj)
         return db_obj
     
-    def remove(self, db: Session, *, id:int) -> ModelType:
+    def remove(self, db: Session, *, id:int, commit: bool = True) -> ModelType:
         obj = db.query(self.model).get(id)
         db.delete(obj)
-        db.commit()
+        if commit:
+            db.commit()
         return obj
     
     def get_count(self, db:Session) -> int:
         return db.query(self.model).count()
+    
+    def get_by_ids(self, db: Session, ids: List[int]) -> List[ModelType]:
+        return db.query(self.model).filter(self.model.id.in_(ids)).all()

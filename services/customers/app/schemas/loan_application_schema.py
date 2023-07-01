@@ -1,43 +1,10 @@
 from pydantic import BaseModel, validator
 from decimal import Decimal
 from app.constants import is_valid_term_mode, is_valid_payment_mode
-from typing import List
+from typing import List, Union
 from datetime import date
+from app.schemas import Customer
 
-class LoanApplicationCreate(BaseModel):
-    date_applied: date
-    purpose: str
-    principal_amount: Decimal
-    interest_rate: Decimal
-    interest_rate_flat: bool
-    o_and_s_rate: Decimal
-    o_and_s_rate_flat: bool
-    length: int
-    term_mode: int
-    loan_type: int
-    mode_of_payment: int
-    
-    @validator("term_mode")
-    def validate_term(cls, term_mode, values, **kwargs):
-        if not is_valid_term_mode(term_mode):
-            raise ValueError("Not a valid term mode")
-        return term_mode
-    
-    @validator("mode_of_payment")
-    def validate_mode_of_payment(cls, mode_of_payment, values, **kwargs):
-        if not is_valid_payment_mode(mode_of_payment):
-            raise ValueError("Not a valid mode of payment")
-        return mode_of_payment
-    
-
-class LoanApplicationUpdate(LoanApplicationCreate):
-    pass
-
-class LoanApplication(LoanApplicationUpdate):
-    class Config:
-        orm_mode = True
-
-# 
 class GuarantorCreate(BaseModel):
     first_name: str
     last_name: str
@@ -59,6 +26,54 @@ class Guarantor(GuarantorUpdate):
 class GuarantorsList(BaseModel):
     guarantors: List[Guarantor]
     count: int
+
+# 
+class LoanApplicationCreate(BaseModel):
+    customer_id: int
+    guarantors: List[int]
+    co_borrowers: Union[None, List[int]]
+    date_applied: date
+    purpose: str
+    principal_amount: Decimal
+    interest_rate: Decimal
+    interest_rate_is_flat: bool
+    o_and_s_rate: Decimal
+    loan_repayment_amount: Union[Decimal, None]
+    o_and_s_rate_is_flat: bool
+    length: int
+    term: int
+    loan_type: int
+    mode_of_payment: int
+    
+    @validator("term")
+    def validate_term(cls, term, values, **kwargs):
+        if not is_valid_term_mode(term):
+            raise ValueError("Not a valid term mode")
+        return term
+    
+    @validator("mode_of_payment")
+    def validate_mode_of_payment(cls, mode_of_payment, values, **kwargs):
+        if not is_valid_payment_mode(mode_of_payment):
+            raise ValueError("Not a valid mode of payment")
+        return mode_of_payment
+    
+    # @validator("guarantors")
+    # def validate_guarantors(cls, guarantors, values, **kwargs):
+    #     if len(guarantors) <= 0:
+    #         raise ValueError("There needs to be at least one guarantor")
+    #     return guarantors
+    
+  
+    
+
+class LoanApplicationUpdate(LoanApplicationCreate):
+    pass
+
+class LoanApplication(LoanApplicationUpdate):
+    guarantors: List[Guarantor]
+    co_borrowers: Union[None, List[Customer]]
+    class Config:
+        orm_mode = True
 
 # 
 class LoanApplicationPaymentScheduleCreate(BaseModel):

@@ -3,6 +3,8 @@ from sqlalchemy.orm import relationship
 from app.database.database import Base
 from app.constants import CustomerType, BusinessType, Gender, MaritalStatus, OccupationStatus
 from sqlalchemy.sql import func
+# from app.models import loan_application_co_borrowers
+from app.models.loan_application_model import loan_application_co_borrowers
 
 
 class Customer(Base):
@@ -12,10 +14,11 @@ class Customer(Base):
     user_type = Column(Integer, default=CustomerType.INDIVIDUAL)
     individual = relationship("Individual", back_populates="customer")
     business = relationship("Business", back_populates="customer")
-    loan_applications = relationship("LoanApplication", back_populates="customers")
+    loan_applications = relationship(
+        "LoanApplication", secondary=loan_application_co_borrowers, back_populates="co_borrowers")
 
     time_created = Column(DateTime(timezone=True),
-                             server_default=func.now(), nullable=False)
+                          server_default=func.now(), nullable=False)
     time_updated = Column(DateTime(
         timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -32,7 +35,7 @@ class Individual(Base):
     occupation_status = Column(Integer, default=OccupationStatus.EMPLOYED)
     gender = Column(Integer, default=Gender.Male)
     time_created = Column(DateTime(timezone=True),
-                             server_default=func.now(), nullable=False)
+                          server_default=func.now(), nullable=False)
     time_updated = Column(DateTime(
         timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -56,7 +59,7 @@ class Employer(Base):
     email = Column(String)
     number = Column(String)
     time_created = Column(DateTime(timezone=True),
-                             server_default=func.now(), nullable=False)
+                          server_default=func.now(), nullable=False)
     time_updated = Column(DateTime(
         timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -74,7 +77,7 @@ class Address(Base):
     nearest_landmark = Column(String, nullable=False)
     country = Column(String, nullable=False)
     time_created = Column(DateTime(timezone=True),
-                             server_default=func.now(), nullable=False)
+                          server_default=func.now(), nullable=False)
     time_updated = Column(DateTime(
         timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -88,7 +91,7 @@ class MobileNumber(Base):
     id = Column(Integer, primary_key=True)
     number = Column(String)
     time_created = Column(DateTime(timezone=True),
-                             server_default=func.now(), nullable=False)
+                          server_default=func.now(), nullable=False)
     time_updated = Column(DateTime(
         timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -102,7 +105,7 @@ class EmailAddress(Base):
     id = Column(Integer, primary_key=True)
     email = Column(String)
     time_created = Column(DateTime(timezone=True),
-                             server_default=func.now(), nullable=False)
+                          server_default=func.now(), nullable=False)
     time_updated = Column(DateTime(
         timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
@@ -119,11 +122,10 @@ class Business(Base):
     business_number = Column(String)
     business_email = Column(String)
     time_created = Column(DateTime(timezone=True),
-                             server_default=func.now(), nullable=False)
+                          server_default=func.now(), nullable=False)
     time_updated = Column(DateTime(
         timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     customer_id = Column(Integer, ForeignKey(
         "customers.id"), unique=True, nullable=False)
     customer = relationship("Customer", back_populates="business")
-
