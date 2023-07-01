@@ -8,7 +8,7 @@ from .customer_schema import BussinessCreate, BussinessCustomerCreate, Bussiness
 
 
 from .loan_application_schema import LoanApplicationCreate, LoanApplicationUpdate, LoanApplication
-from .loan_application_schema import GuarantorCreate, GuarantorUpdate, Guarantor
+from .loan_application_schema import GuarantorCreate, GuarantorUpdate, Guarantor, GuarantorsList
 from .loan_application_schema import LoanApplicationPaymentScheduleCreate, LoanApplicationPaymentScheduleUpdate, LoanApplicationPaymentSchedule
 from .loan_application_schema import LoanApplicationChequesCreate, LoanApplicationChequesUpdate, LoanApplicationCheques
 from .loan_application_schema import FeesCreate, FeesUpdate, Fees

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, validator
 from decimal import Decimal
 from app.constants import is_valid_term_mode, is_valid_payment_mode
-# from typing import 
+from typing import List
 from datetime import date
 
 class LoanApplicationCreate(BaseModel):
@@ -46,7 +46,7 @@ class GuarantorCreate(BaseModel):
     address: str
     employer_name: str
     employer_email: str
-    employer_email: str
+    employer_number: str
     employer_address: str
 
 class GuarantorUpdate(GuarantorCreate):
@@ -55,6 +55,10 @@ class GuarantorUpdate(GuarantorCreate):
 class Guarantor(GuarantorUpdate):
     class Config:
         orm_mode = True
+
+class GuarantorsList(BaseModel):
+    guarantors: List[Guarantor]
+    count: int
 
 # 
 class LoanApplicationPaymentScheduleCreate(BaseModel):

@@ -46,7 +46,7 @@ class Guarantor(Base):
     time_updated = Column(DateTime(
         timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     loan_applications = relationship(
-        "LoanApplication", secondary=loan_application_guarantors, back_populates="gurantors")
+        "LoanApplication", secondary=loan_application_guarantors, back_populates="guarantors")
 
 
 class LoanApplication(Base):
@@ -72,7 +72,7 @@ class LoanApplication(Base):
     time_updated = Column(DateTime(
         timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     customer_id = Column(Integer, ForeignKey('customers.id'))
-    customer = relationship("Customer", back_populates="loan_applications")
+    customers = relationship("Customer", back_populates="loan_applications")
     cheques = relationship("LoanApplicationCheques",
                            back_populates="loan_application")
 
@@ -120,6 +120,8 @@ class Fees(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String, nullable=False)
     amount = Column(DECIMAL(scale=2), nullable=False)
+    loan_applications = relationship(
+        "LoanApplication", secondary=loan_application_fees, back_populates="fees")
     time_created = Column(DateTime(timezone=True),
                           server_default=func.now(), nullable=False)
     time_updated = Column(DateTime(
