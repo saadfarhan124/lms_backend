@@ -5,6 +5,37 @@ from typing import List, Union
 from datetime import date
 from app.schemas import Customer
 
+
+# 
+class LoanApplicationChequesCreate(BaseModel):
+    loan_application_id: Union[None, int]
+    bank: str
+    branch: str
+    cheque_no: str
+    date: date
+    amount: Decimal
+    
+class LoanApplicationChequesUpdate(LoanApplicationChequesCreate):
+    id: int
+
+class LoanApplicationCheques(LoanApplicationChequesUpdate):
+    class Config:
+        orm_mode = True
+
+# 
+class FeesCreate(BaseModel):
+    title: str
+    amount: Decimal
+
+class FeesUpdate(FeesCreate):
+    id: int
+
+class Fees(FeesUpdate):
+    class Config:
+        orm_mode = True
+
+# 
+
 class GuarantorCreate(BaseModel):
     first_name: str
     last_name: str
@@ -20,6 +51,25 @@ class GuarantorUpdate(GuarantorCreate):
     id: int
 
 class Guarantor(GuarantorUpdate):
+    formatted_date_str: str = None
+
+    @validator("formatted_date_str", always=True)
+    def get_formatted_date(cls, v, values, **kwargs):
+        date_of_birth = values["date_of_birth"]  # Assuming the date_of_birth value is a string
+        # Determine the day suffix
+        day = date_of_birth.day
+        if day in (1, 21, 31):
+            suffix = "st"
+        elif day in (2, 22):
+            suffix = "nd"
+        elif day in (3, 23):
+            suffix = "rd"
+        else:
+            suffix = "th"
+
+        # # Format the date
+        formatted_date = date_of_birth.strftime(f"%d{suffix} %b, %Y")
+        return f"{formatted_date}"
     class Config:
         orm_mode = True
 
@@ -32,6 +82,8 @@ class LoanApplicationCreate(BaseModel):
     customer_id: int
     guarantors: List[int]
     co_borrowers: Union[None, List[int]]
+    cheques: Union[None, List[LoanApplicationChequesCreate]]
+    fees: Union[None, List[FeesCreate]]
     date_applied: date
     purpose: str
     principal_amount: Decimal
@@ -72,6 +124,9 @@ class LoanApplicationUpdate(LoanApplicationCreate):
 class LoanApplication(LoanApplicationUpdate):
     guarantors: List[Guarantor]
     co_borrowers: Union[None, List[Customer]]
+    cheques: Union[None, List[LoanApplicationCheques]]
+    fees: Union[None, List[Fees]]
+
     class Config:
         orm_mode = True
 
@@ -85,34 +140,6 @@ class LoanApplicationPaymentScheduleUpdate(LoanApplicationPaymentScheduleCreate)
 class LoanApplicationPaymentSchedule(LoanApplicationPaymentScheduleUpdate):
     class Config:
         orm_mode  = True
-
-
-# 
-class LoanApplicationChequesCreate(BaseModel):
-    bank: str
-    branch: str
-    cheque_no: str
-    date: date
-    amount: Decimal
-    
-class LoanApplicationChequesUpdate(LoanApplicationChequesCreate):
-    id: int
-
-class LoanApplicationCheques(LoanApplicationChequesUpdate):
-    class Config:
-        orm_mode = True
-
-# 
-class FeesCreate(BaseModel):
-    title: str
-    amount: Decimal
-
-class FeesUpdate(FeesCreate):
-    id: int
-
-class Fees(FeesUpdate):
-    class Config:
-        orm_mode = True
 
 
 # 

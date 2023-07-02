@@ -24,20 +24,33 @@ def create_loan_application(loan_application: LoanApplicationCreate, db: Session
         loan_application.loan_repayment_amount = loan_repayment_amount.quantize(Decimal('0.00'), rounding=ROUND_HALF_UP)
         loan_application_obj = loan_application_crud.create(db, create_schema=loan_application)
 
-        co_borrowers = None
+        # Co Borrowers
         if loan_application.co_borrowers is not None and len(loan_application.co_borrowers) > 0:
             co_borrowers = customer_crud.get_by_ids(db, ids=loan_application.co_borrowers)
             for co_borrower in co_borrowers:
                 loan_application_obj.co_borrowers.append(co_borrower)
         
+        # Guarantors
         guarantors = guarantor_crud.get_by_ids(db, ids=loan_application.guarantors)
         for guarantor in guarantors:
             loan_application_obj.guarantors.append(guarantor)
 
+        # Cheques
+        if loan_application.cheques is not None and len(loan_application.cheques) > 0:
+            for cheque in loan_application.cheques:
+                cheque.loan_application_id = loan_application_obj.id
+                loan_application_cheques_crud.create(db, create_schema=cheque)
+                
+        # Fees
+        if loan_application.fees is not None and len(loan_application.fees) > 0:
+            for fee in loan_application.fees:
+                fee_obj = fees_crud.create(db, create_schema=fee)
+                loan_application_obj.fees.append(fee_obj)
+                
         db.add(loan_application_obj)
         db.commit()
         db.refresh(loan_application_obj)
-
+        
         return loan_application_obj
     except ValidationError as e:
         raise HTTPException(status_code=400, detail=str(e))
