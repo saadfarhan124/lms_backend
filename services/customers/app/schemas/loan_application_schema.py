@@ -156,6 +156,15 @@ class LoanApplication(LoanApplicationUpdate):
 
 
 
+# 
+
+class PaymentSchedule(BaseModel):
+    current_date: date
+    total_amount: Decimal
+    loan_repayment_amount: Decimal
+    interest_amount: Decimal
+    num_payments: int
+    term_mode: int
 
 # 
 
