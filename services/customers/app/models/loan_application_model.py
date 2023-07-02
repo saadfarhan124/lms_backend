@@ -76,6 +76,8 @@ class LoanApplication(Base):
     customers = relationship("Customer", back_populates="loan_applications")
     cheques = relationship("LoanApplicationCheques",
                            back_populates="loan_application")
+    schedules = relationship("LoanApplicationPaymentSchedule",
+                           back_populates="loan_application")
 
     guarantors = relationship(
         "Guarantor", secondary=loan_application_guarantors, back_populates="loan_applications")
@@ -91,7 +93,10 @@ class LoanApplicationPaymentSchedule(Base):
     payment_date = Column(Date, nullable=False)
     bagging_balance = Column(DECIMAL(scale=2), nullable=False)
     balance = Column(DECIMAL(scale=2), nullable=False)
-
+    interest_paid = Column(DECIMAL(scale=2), nullable=False)
+    loan_application_id = Column(Integer, ForeignKey('loan_applications.id'))
+    loan_application = relationship(
+        "LoanApplication", back_populates="schedules")
     time_created = Column(DateTime(timezone=True),
                           server_default=func.now(), nullable=False)
     time_updated = Column(DateTime(

@@ -78,11 +78,27 @@ class GuarantorsList(BaseModel):
     count: int
 
 # 
+class LoanApplicationPaymentScheduleCreate(BaseModel):
+    loan_application_id: Union[None, int]
+    payment_date: date
+    bagging_balance: Decimal
+    balance: Decimal
+    interest_paid: Decimal
+
+class LoanApplicationPaymentScheduleUpdate(LoanApplicationPaymentScheduleCreate):
+    id: int
+
+class LoanApplicationPaymentSchedule(LoanApplicationPaymentScheduleUpdate):
+    class Config:
+        orm_mode  = True
+
+# 
 class LoanApplicationCreate(BaseModel):
     customer_id: int
     guarantors: List[int]
     co_borrowers: Union[None, List[int]]
     cheques: Union[None, List[LoanApplicationChequesCreate]]
+    schedules: List[LoanApplicationPaymentScheduleCreate]
     fees: Union[None, List[FeesCreate]]
     date_applied: date
     purpose: str
@@ -109,11 +125,18 @@ class LoanApplicationCreate(BaseModel):
             raise ValueError("Not a valid mode of payment")
         return mode_of_payment
     
-    # @validator("guarantors")
-    # def validate_guarantors(cls, guarantors, values, **kwargs):
-    #     if len(guarantors) <= 0:
-    #         raise ValueError("There needs to be at least one guarantor")
-    #     return guarantors
+    
+    @validator("guarantors")
+    def validate_guarantors(cls, guarantors, values, **kwargs):
+        if len(guarantors) <= 0:
+            raise ValueError("There needs to be at least one guarantor")
+        return guarantors
+    
+    @validator("schedules")
+    def validate_schedules(cls, schedules, values, **kwargs):
+        if len(schedules) <= 0:
+            raise ValueError("There needs to be at least one payment schedule")
+        return schedules
     
   
     
@@ -126,20 +149,12 @@ class LoanApplication(LoanApplicationUpdate):
     co_borrowers: Union[None, List[Customer]]
     cheques: Union[None, List[LoanApplicationCheques]]
     fees: Union[None, List[Fees]]
+    schedules: List[LoanApplicationPaymentSchedule]
 
     class Config:
         orm_mode = True
 
-# 
-class LoanApplicationPaymentScheduleCreate(BaseModel):
-    pass
 
-class LoanApplicationPaymentScheduleUpdate(LoanApplicationPaymentScheduleCreate):
-    id: int
-
-class LoanApplicationPaymentSchedule(LoanApplicationPaymentScheduleUpdate):
-    class Config:
-        orm_mode  = True
 
 
 # 

@@ -33,6 +33,7 @@ def create_loan_application(loan_application: LoanApplicationCreate, db: Session
         # Guarantors
         guarantors = guarantor_crud.get_by_ids(db, ids=loan_application.guarantors)
         for guarantor in guarantors:
+            print(guarantor.address)
             loan_application_obj.guarantors.append(guarantor)
 
         # Cheques
@@ -46,7 +47,12 @@ def create_loan_application(loan_application: LoanApplicationCreate, db: Session
             for fee in loan_application.fees:
                 fee_obj = fees_crud.create(db, create_schema=fee)
                 loan_application_obj.fees.append(fee_obj)
-                
+        
+        # Payment Schedules
+        for schedule in loan_application.schedules:
+            schedule.loan_application_id = loan_application_obj.id
+            loan_application_payment_schedule_crud.create(db, create_schema=schedule)
+
         db.add(loan_application_obj)
         db.commit()
         db.refresh(loan_application_obj)
@@ -75,3 +81,32 @@ def get_all_guarantors(offset: int, limit: int, db:Session = Depends(get_db)):
 def update_gurantor(guarantor: GuarantorUpdate, db: Session = Depends(get_db)):
     guarantor_obj = guarantor_crud.get(db, id=guarantor.id)
     return guarantor_crud.update(db, db_obj=guarantor_obj, update_schema=guarantor)
+
+
+# from datetime import datetime, timedelta
+
+# def calculate_amortization_schedule(total_amount, loan_amount, interest_amount, num_payments, term_mode):
+#     payment_date = datetime.now().date()
+#     interest_paid = interest_amount /  num_payments
+#     principal_paid = loan_amount - interest_paid
+#     print("No\tPayment Date\tBagging Balance\tPayment\tPrincipal Paid\tInterest Paid\tBalance")
+#     bagging_balance = total_amount
+#     balance = total_amount - loan_amount
+    
+#     if term_mode == "Weeks":
+#         term_delta = timedelta(weeks=1)
+#     elif term_mode == "Months":
+#         term_delta = timedelta(days=30)  # Assuming 30 days in a month
+#     elif term_mode == "Fortnight":
+#         term_delta = timedelta(weeks=2)
+#     for i in range(1, num_payments + 1):
+#         print(f"{i}\t{payment_date.strftime('%b %d, %Y')}\t{bagging_balance:.2f}\t{loan_amount:.2f}\t{principal_paid:.2f}\t{interest_paid:.2f}\t{balance:.2f}")
+
+#         next_payment_date = payment_date + term_delta
+#         while next_payment_date.day != payment_date.day:
+#             next_payment_date += timedelta(days=1)
+#         payment_date = next_payment_date
+#         bagging_balance -= loan_amount
+#         balance -= loan_amount
+
+# calculate_amortization_schedule(307.2, 61.44,51.2, 2, "Months")
