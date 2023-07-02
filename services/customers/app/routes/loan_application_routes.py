@@ -131,7 +131,7 @@ def get_all_guarantors(offset: int, limit: int, db: Session = Depends(get_db)):
     return GuarantorsList(guarantors=guarantor_crud.get_multi(db, offset=offset, limit=limit), count=guarantor_crud.get_count(db))
 
 
-@router.get("/guarantors/{offset}/{limit}", response_model=List[Guarantor])
+@router.get("/guarantors", response_model=List[Guarantor])
 def get_all_guarantors(offset: int, limit: int, db: Session = Depends(get_db)):
     return guarantor_crud.get_all(db)
 

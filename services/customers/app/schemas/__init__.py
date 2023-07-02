@@ -1,4 +1,4 @@
-from .customer_schema import Customer, CustomerCreate, CustomerUpdate
+from .customer_schema import Customer, CustomerCreate, CustomerUpdate, CustomerReturn
 from .customer_schema import EmployerCreate, EmployerUpdate
 from .customer_schema import AddressCreate, AddressUpdate
 from .customer_schema import EmailAddressUpdate, EmailAddressCreate, EmailAddressDelete

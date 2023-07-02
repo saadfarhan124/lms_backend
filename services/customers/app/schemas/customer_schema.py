@@ -225,3 +225,7 @@ class Business(BussinessCreate):
 class BusinessList(BaseModel):
     customers: List[Business]
     count: int
+
+class CustomerReturn(Customer):
+    individual: Union[Individual, None]
+    business: Union[Business, None]

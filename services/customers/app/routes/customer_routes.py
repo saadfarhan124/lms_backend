@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from typing import List
-from app.schemas import CustomerCreate, Individual, IndividualList, IndividualUpdate, AddressUpdate, EmployerUpdate
+from app.schemas import CustomerCreate, CustomerReturn
+from app.schemas import Individual, IndividualList, IndividualUpdate, AddressUpdate, EmployerUpdate, Customer
 from app.schemas import BussinessCustomerCreate, Business, BussinessUpdate, BusinessList
 from app.schemas import EmailAddressDelete, MobileNumberDelete
 from app.database.database import get_db
@@ -117,7 +118,14 @@ def update_business(business: BussinessUpdate, db: Session = Depends(get_db)):
 
 # Delete Customer Individual
 # Delete Customer Business
+# Get All Customers
 
+@router.get("/customers")
+def get_all_customers(db: Session = Depends(get_db)):
+    lst =  individual_crud.get_all(db)
+    bussiness_list = bussiness_crud.get_all(db)    
+    return lst + bussiness_list
+    
 
 # Utils
 @router.get("/customers/business-types")
