@@ -160,6 +160,9 @@ class LoanApplication(LoanApplicationUpdate):
         orm_mode = True
 
 
+class LoanApplicationList(BaseModel):
+    loan_applications: List[LoanApplication]
+    count: int
 
 # 
 

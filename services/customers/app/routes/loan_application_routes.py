@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import Union, Dict, Any, List
-from app.schemas import LoanApplicationCreate, LoanApplication
+from app.schemas import LoanApplicationCreate, LoanApplication, LoanApplicationList
 from app.schemas import GuarantorCreate, GuarantorUpdate, Guarantor, GuarantorsList
 from app.schemas import LoanApplicationPaymentScheduleCreate
 from app.schemas import PaymentSchedule, ScheduleReturn
@@ -76,6 +76,11 @@ def create_loan_application(loan_application: LoanApplicationCreate, db: Session
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=get_tracback())
+
+
+@router.get('/loan_applications/{offset}/{limit}', response_model=LoanApplicationList)
+def get_loan_applications(offset: int, limit: int, db: Session = Depends(get_db)):
+    return LoanApplicationList(loan_applications=loan_application_crud.get_multi(db, offset=offset, limit=limit), count=loan_application_crud.get_count(db))
 
 
 @router.post("/payment_schedule", response_model=ScheduleReturn)
@@ -170,7 +175,7 @@ def update_gurantor(guarantor: GuarantorUpdate, db: Session = Depends(get_db)):
 
 
 # Utils
-@router.get("/loan-application/term-modes")
+@router.get("/loan_application/term_modes")
 def get_term_modes():
     term_modes = [
         {"key": bt.value, "value": get_term_modes_string(bt.value)}
@@ -179,7 +184,7 @@ def get_term_modes():
     return {"data": term_modes}
 
 
-@router.get("/loan-application/payment-modes")
+@router.get("/loan_application/payment_modes")
 def get_mode_pf_payments():
     term_modes = [
         {"key": bt.value, "value": get_mode_of_payments_string(bt.value)}
