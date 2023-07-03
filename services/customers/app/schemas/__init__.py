@@ -13,5 +13,5 @@ from .loan_application_schema import LoanApplicationPaymentScheduleCreate, LoanA
 from .loan_application_schema import LoanApplicationChequesCreate, LoanApplicationChequesUpdate, LoanApplicationCheques
 from .loan_application_schema import FeesCreate, FeesUpdate, Fees
 from .loan_application_schema import PreDefinedFeesCreate, PreDefinedFeesUpdate, PreDefinedFees
-from .loan_application_schema import PaymentSchedule
+from .loan_application_schema import PaymentSchedule, LoanApplicationWithCustomer
 from .loan_application_schema import ScheduleReturn

@@ -4,7 +4,7 @@ from typing import Union, Dict, Any, List
 from app.schemas import LoanApplicationCreate, LoanApplication, LoanApplicationList
 from app.schemas import GuarantorCreate, GuarantorUpdate, Guarantor, GuarantorsList
 from app.schemas import LoanApplicationPaymentScheduleCreate
-from app.schemas import PaymentSchedule, ScheduleReturn
+from app.schemas import PaymentSchedule, ScheduleReturn, LoanApplicationWithCustomer
 from app.schemas import PreDefinedFees
 from decimal import Decimal, ROUND_HALF_UP
 from app.database.database import get_db
@@ -13,6 +13,7 @@ from app.utils import customer as customer_crud
 from app.utilities import get_tracback, get_formatted_date
 from app.constants import TermModes, get_term_modes_string, ModeOfPayments, get_mode_of_payments_string
 from app.constants import get_loan_status_string, get_loan_type_string
+from app.constants import CustomerType
 from datetime import datetime, timedelta
 from pydantic import ValidationError
 
@@ -98,6 +99,17 @@ def get_loan_applications(offset: int, limit: int, db: Session = Depends(get_db)
             loan_application.customer_name = loan_application.customers.business[0].name
 
     return {"loan_applications": loan_applications, "count": loan_application_crud.get_count(db)}
+
+
+@router.get('/loan_application/{id}/', response_model=LoanApplicationWithCustomer)
+def get_loan_applications(id: int, db: Session = Depends(get_db)):
+    loan_application = loan_application_crud.get(db, id=id)
+    customer = None
+    if loan_application.customers.user_type == CustomerType.INDIVIDUAL.value:
+        customer = loan_application.customers.individual[0]
+    else:
+        customer = loan_application.customers.business[0]
+    return LoanApplicationWithCustomer(loan_application=loan_application, customer=customer)
 
 
 @router.post("/payment_schedule", response_model=ScheduleReturn)

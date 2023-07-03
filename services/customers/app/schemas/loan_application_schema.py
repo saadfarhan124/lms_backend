@@ -4,7 +4,7 @@ from app.constants import is_valid_term_mode, is_valid_payment_mode
 from app.constants import get_loan_type_string, get_loan_status_string
 from typing import List, Union
 from datetime import date
-from app.schemas import Customer
+from app.schemas import Customer, Individual, Business
 
 
 #
@@ -176,15 +176,14 @@ class LoanApplication(LoanApplicationUpdate):
     loan_type_string: str = None
     status_string: str = None
 
-
     @validator("loan_type_string", always=True)
     def get_loan_type_string(cls, v, values, **kwargs):
         return f"{get_loan_type_string(values['loan_type'])}"
-    
+
     @validator("status_string", always=True)
     def get_status_string(cls, v, values, **kwargs):
         return f"{get_loan_status_string(values['status'])}"
-    
+
     @validator("formatted_date_str", always=True)
     def get_formatted_date(cls, v, values, **kwargs):
         # Assuming the date_of_birth value is a string
@@ -248,3 +247,8 @@ class PreDefinedFees(PreDefinedFeesUpdate):
 class ScheduleReturn(BaseModel):
     schedule: List[LoanApplicationPaymentScheduleCreate]
     breakdown: PaymentSchedule
+
+
+class LoanApplicationWithCustomer(BaseModel):
+    loan_application: LoanApplication
+    customer: Union[Individual, Business]
