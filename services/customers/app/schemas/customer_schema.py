@@ -142,7 +142,6 @@ class Customer(BaseModel):
     class Config:
         orm_mode = True
 
-
 class Individual(IndividualCreate):
     id: int
     employer: Employer

@@ -1,12 +1,13 @@
 from pydantic import BaseModel, validator
 from decimal import Decimal
 from app.constants import is_valid_term_mode, is_valid_payment_mode
+from app.constants import get_loan_type_string, get_loan_status_string
 from typing import List, Union
 from datetime import date
-from app.schemas import Customer
+from app.schemas import Customer, CustomerTest
 
 
-# 
+#
 class LoanApplicationChequesCreate(BaseModel):
     loan_application_id: Union[None, int]
     bank: str
@@ -14,27 +15,34 @@ class LoanApplicationChequesCreate(BaseModel):
     cheque_no: str
     date: date
     amount: Decimal
-    
+
+
 class LoanApplicationChequesUpdate(LoanApplicationChequesCreate):
     id: int
+
 
 class LoanApplicationCheques(LoanApplicationChequesUpdate):
     class Config:
         orm_mode = True
 
-# 
+#
+
+
 class FeesCreate(BaseModel):
     title: str
     amount: Decimal
 
+
 class FeesUpdate(FeesCreate):
     id: int
+
 
 class Fees(FeesUpdate):
     class Config:
         orm_mode = True
 
-# 
+#
+
 
 class GuarantorCreate(BaseModel):
     first_name: str
@@ -47,15 +55,18 @@ class GuarantorCreate(BaseModel):
     employer_number: str
     employer_address: str
 
+
 class GuarantorUpdate(GuarantorCreate):
     id: int
+
 
 class Guarantor(GuarantorUpdate):
     formatted_date_str: str = None
 
     @validator("formatted_date_str", always=True)
     def get_formatted_date(cls, v, values, **kwargs):
-        date_of_birth = values["date_of_birth"]  # Assuming the date_of_birth value is a string
+        # Assuming the date_of_birth value is a string
+        date_of_birth = values["date_of_birth"]
         # Determine the day suffix
         day = date_of_birth.day
         if day in (1, 21, 31):
@@ -70,14 +81,18 @@ class Guarantor(GuarantorUpdate):
         # # Format the date
         formatted_date = date_of_birth.strftime(f"%d{suffix} %b, %Y")
         return f"{formatted_date}"
+
     class Config:
         orm_mode = True
+
 
 class GuarantorsList(BaseModel):
     guarantors: List[Guarantor]
     count: int
 
-# 
+#
+
+
 class LoanApplicationPaymentScheduleCreate(BaseModel):
     loan_application_id: Union[None, int]
     # loan_application_id: Union[None, int]
@@ -87,17 +102,19 @@ class LoanApplicationPaymentScheduleCreate(BaseModel):
     bagging_balance: Decimal
     balance: Decimal
     interest_paid: Decimal
-   
 
 
 class LoanApplicationPaymentScheduleUpdate(LoanApplicationPaymentScheduleCreate):
     id: int
 
+
 class LoanApplicationPaymentSchedule(LoanApplicationPaymentScheduleUpdate):
     class Config:
-        orm_mode  = True
+        orm_mode = True
 
-# 
+#
+
+
 class LoanApplicationCreate(BaseModel):
     customer_id: int
     guarantors: List[int]
@@ -115,46 +132,77 @@ class LoanApplicationCreate(BaseModel):
     o_and_s_rate_is_flat: bool
     length: int
     term: int
+    status: Union[None, int]
     loan_type: int
     mode_of_payment: int
-    
+
     @validator("term")
     def validate_term(cls, term, values, **kwargs):
         if not is_valid_term_mode(term):
             raise ValueError("Not a valid term mode")
         return term
-    
+
     @validator("mode_of_payment")
     def validate_mode_of_payment(cls, mode_of_payment, values, **kwargs):
         if not is_valid_payment_mode(mode_of_payment):
             raise ValueError("Not a valid mode of payment")
         return mode_of_payment
-    
-    
+
     @validator("guarantors")
     def validate_guarantors(cls, guarantors, values, **kwargs):
         if len(guarantors) <= 0:
             raise ValueError("There needs to be at least one guarantor")
         return guarantors
-    
+
     @validator("schedules")
     def validate_schedules(cls, schedules, values, **kwargs):
         if len(schedules) <= 0:
             raise ValueError("There needs to be at least one payment schedule")
         return schedules
-    
-  
-    
+
 
 class LoanApplicationUpdate(LoanApplicationCreate):
-    pass
+    id: int
+
 
 class LoanApplication(LoanApplicationUpdate):
+    customers: CustomerTest
     guarantors: List[Guarantor]
     co_borrowers: Union[None, List[Customer]]
     cheques: Union[None, List[LoanApplicationCheques]]
     fees: Union[None, List[Fees]]
     schedules: List[LoanApplicationPaymentSchedule]
+    formatted_date_str: str = None
+    loan_type_string: str = None
+    status_string: str = None
+
+
+    @validator("loan_type_string", always=True)
+    def get_loan_type_string(cls, v, values, **kwargs):
+        return f"{get_loan_type_string(values['loan_type'])}"
+    
+    @validator("status_string", always=True)
+    def get_status_string(cls, v, values, **kwargs):
+        return f"{get_loan_status_string(values['status'])}"
+    
+    @validator("formatted_date_str", always=True)
+    def get_formatted_date(cls, v, values, **kwargs):
+        # Assuming the date_of_birth value is a string
+        date_applied = values["date_applied"]
+        # Determine the day suffix
+        day = date_applied.day
+        if day in (1, 21, 31):
+            suffix = "st"
+        elif day in (2, 22):
+            suffix = "nd"
+        elif day in (3, 23):
+            suffix = "rd"
+        else:
+            suffix = "th"
+
+        # # Format the date
+        formatted_date = date_applied.strftime(f"%d{suffix} %b, %Y")
+        return f"{formatted_date}"
 
     class Config:
         orm_mode = True
@@ -164,7 +212,8 @@ class LoanApplicationList(BaseModel):
     loan_applications: List[LoanApplication]
     count: int
 
-# 
+#
+
 
 class PaymentSchedule(BaseModel):
     current_date: date
@@ -180,13 +229,16 @@ class PaymentSchedule(BaseModel):
     o_and_s_amount: Union[None, Decimal]
     o_and_s_rate_is_flat: Union[None, bool]
 
-# 
+#
+
 
 class PreDefinedFeesCreate(BaseModel):
     title: str
 
+
 class PreDefinedFeesUpdate(PreDefinedFeesCreate):
     id: int
+
 
 class PreDefinedFees(PreDefinedFeesUpdate):
     class Config:

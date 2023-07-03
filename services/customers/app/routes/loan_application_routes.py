@@ -5,12 +5,14 @@ from app.schemas import LoanApplicationCreate, LoanApplication, LoanApplicationL
 from app.schemas import GuarantorCreate, GuarantorUpdate, Guarantor, GuarantorsList
 from app.schemas import LoanApplicationPaymentScheduleCreate
 from app.schemas import PaymentSchedule, ScheduleReturn
+from app.schemas import PreDefinedFees
 from decimal import Decimal, ROUND_HALF_UP
 from app.database.database import get_db
 from app.utils import loan_application_crud, loan_application_cheques_crud, loan_application_payment_schedule_crud, guarantor_crud, fees_crud, predefined_fees_crud
 from app.utils import customer as customer_crud
-from app.utilities import get_tracback
+from app.utilities import get_tracback, get_formatted_date
 from app.constants import TermModes, get_term_modes_string, ModeOfPayments, get_mode_of_payments_string
+from app.constants import get_loan_status_string, get_loan_type_string
 from datetime import datetime, timedelta
 from pydantic import ValidationError
 
@@ -46,7 +48,6 @@ def create_loan_application(loan_application: LoanApplicationCreate, db: Session
         guarantors = guarantor_crud.get_by_ids(
             db, ids=loan_application.guarantors)
         for guarantor in guarantors:
-            print(guarantor.address)
             loan_application_obj.guarantors.append(guarantor)
 
         # Cheques
@@ -78,9 +79,25 @@ def create_loan_application(loan_application: LoanApplicationCreate, db: Session
         raise HTTPException(status_code=500, detail=get_tracback())
 
 
-@router.get('/loan_applications/{offset}/{limit}', response_model=LoanApplicationList)
+@router.get('/loan_applications/{offset}/{limit}')
 def get_loan_applications(offset: int, limit: int, db: Session = Depends(get_db)):
-    return LoanApplicationList(loan_applications=loan_application_crud.get_multi(db, offset=offset, limit=limit), count=loan_application_crud.get_count(db))
+    loan_applications = loan_application_crud.get_multi(
+        db, offset=offset, limit=limit)
+    for loan_application in loan_applications:
+        loan_application.formatted_date_str = get_formatted_date(
+            loan_application.date_applied)
+        loan_application.loan_type_string = get_loan_type_string(
+            loan_application.loan_type)
+        loan_application.status_string = get_loan_status_string(
+            loan_application.status)
+
+        if loan_application.customers.individual[0] is not None:
+            loan_application.customer_name = loan_application.customers.individual[
+                0].first_name + " " + loan_application.customers.individual[0].last_name
+        else:
+            loan_application.customer_name = loan_application.customers.business[0].name
+
+    return {"loan_applications": loan_applications, "count": loan_application_crud.get_count(db)}
 
 
 @router.post("/payment_schedule", response_model=ScheduleReturn)
@@ -140,6 +157,8 @@ def get_payment_schedule(payment_schedule: PaymentSchedule):
             payment_date = next_payment_date
             bagging_balance -= payment_schedule.loan_repayment_amount
             balance -= payment_schedule.loan_repayment_amount
+            if balance < 0:
+                balance = 0
 
         return ScheduleReturn(breakdown=payment_schedule, schedule=payment_schedule_list)
     except Exception as e:
@@ -191,3 +210,8 @@ def get_mode_pf_payments():
         for bt in ModeOfPayments
     ]
     return {"data": term_modes}
+
+
+@router.get("/loan_application/predefined_fees", response_model=List[PreDefinedFees])
+def get_predefined_fees(db: Session = Depends(get_db)):
+    return predefined_fees_crud.get_all(db)
