@@ -4,13 +4,13 @@ from typing import Union, Dict, Any, List
 from app.schemas import LoanApplicationCreate, LoanApplication
 from app.schemas import GuarantorCreate, GuarantorUpdate, Guarantor, GuarantorsList
 from app.schemas import LoanApplicationPaymentScheduleCreate
-from app.schemas import PaymentSchedule
+from app.schemas import PaymentSchedule, ScheduleReturn
 from decimal import Decimal, ROUND_HALF_UP
 from app.database.database import get_db
 from app.utils import loan_application_crud, loan_application_cheques_crud, loan_application_payment_schedule_crud, guarantor_crud, fees_crud, predefined_fees_crud
 from app.utils import customer as customer_crud
 from app.utilities import get_tracback
-from app.constants import TermModes, get_term_modes_string
+from app.constants import TermModes, get_term_modes_string, ModeOfPayments, get_mode_of_payments_string
 from datetime import datetime, timedelta
 from pydantic import ValidationError
 
@@ -77,10 +77,34 @@ def create_loan_application(loan_application: LoanApplicationCreate, db: Session
     except Exception as e:
         raise HTTPException(status_code=500, detail=get_tracback())
 
-@router.post("/payment_schedule", response_model=List[LoanApplicationPaymentScheduleCreate])
+
+@router.post("/payment_schedule", response_model=ScheduleReturn)
 def get_payment_schedule(payment_schedule: PaymentSchedule):
     try:
-        interest_paid = payment_schedule.interest_amount / payment_schedule.num_payments
+        interest_rate = payment_schedule.principal_amount * \
+            (payment_schedule.interest_rate /
+             100) if not payment_schedule.interest_rate_is_flat else payment_schedule.interest_rate
+        interest_rate = interest_rate.quantize(
+            Decimal('0.00'), rounding=ROUND_HALF_UP)
+        o_and_s_rate = payment_schedule.principal_amount * \
+            (payment_schedule.o_and_s_rate /
+             100) if not payment_schedule.o_and_s_rate_is_flat else payment_schedule.o_and_s_rate
+        o_and_s_rate = o_and_s_rate.quantize(
+            Decimal('0.00'), rounding=ROUND_HALF_UP)
+        loan_repayment_amount: Decimal = ((
+            payment_schedule.principal_amount + interest_rate + o_and_s_rate) / payment_schedule.num_payments).quantize(
+            Decimal('0.00'), rounding=ROUND_HALF_UP)
+        payment_schedule.loan_repayment_amount = loan_repayment_amount
+
+        payment_schedule.total_amount = interest_rate + \
+            o_and_s_rate + payment_schedule.principal_amount
+        payment_schedule.interest_amount = interest_rate
+        payment_schedule.o_and_s_amount = o_and_s_rate
+
+        interest_paid = (loan_repayment_amount / payment_schedule.num_payments).quantize(
+            Decimal('0.00'), rounding=ROUND_HALF_UP)
+        principal_paid = (loan_repayment_amount - interest_paid).quantize(
+            Decimal('0.00'), rounding=ROUND_HALF_UP)
         payment_date = payment_schedule.current_date
 
         bagging_balance = payment_schedule.total_amount
@@ -99,17 +123,20 @@ def get_payment_schedule(payment_schedule: PaymentSchedule):
                 payment_date=payment_date,
                 bagging_balance=Decimal(str(bagging_balance)),
                 balance=Decimal(str(balance)),
-                interest_paid=Decimal(str(interest_paid))
-            )
+                interest_paid=Decimal(str(interest_paid)),
+                loan_repayment_amount=loan_repayment_amount,
+                principal_paid=principal_paid)
+
             payment_schedule_list.append(payment_schedule_obj)
             next_payment_date = payment_date + term_delta
-            while next_payment_date.day != payment_date.day:
-                next_payment_date += timedelta(days=1)
+            if payment_schedule.term_mode == TermModes.MONTHS.value:
+                while next_payment_date.day != payment_date.day:
+                    next_payment_date += timedelta(days=1)
             payment_date = next_payment_date
             bagging_balance -= payment_schedule.loan_repayment_amount
             balance -= payment_schedule.loan_repayment_amount
 
-        return payment_schedule_list
+        return ScheduleReturn(breakdown=payment_schedule, schedule=payment_schedule_list)
     except Exception as e:
         raise HTTPException(status_code=500, detail=get_tracback())
 
@@ -132,7 +159,7 @@ def get_all_guarantors(offset: int, limit: int, db: Session = Depends(get_db)):
 
 
 @router.get("/guarantors", response_model=List[Guarantor])
-def get_all_guarantors(offset: int, limit: int, db: Session = Depends(get_db)):
+def get_all_guarantors(db: Session = Depends(get_db)):
     return guarantor_crud.get_all(db)
 
 
@@ -142,11 +169,20 @@ def update_gurantor(guarantor: GuarantorUpdate, db: Session = Depends(get_db)):
     return guarantor_crud.update(db, db_obj=guarantor_obj, update_schema=guarantor)
 
 
-# Term Modes
+# Utils
 @router.get("/loan-application/term-modes")
-def get_marital_status():
+def get_term_modes():
     term_modes = [
         {"key": bt.value, "value": get_term_modes_string(bt.value)}
         for bt in TermModes
+    ]
+    return {"data": term_modes}
+
+
+@router.get("/loan-application/payment-modes")
+def get_mode_pf_payments():
+    term_modes = [
+        {"key": bt.value, "value": get_mode_of_payments_string(bt.value)}
+        for bt in ModeOfPayments
     ]
     return {"data": term_modes}

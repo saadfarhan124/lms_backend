@@ -12,7 +12,7 @@ def get_mode_of_payments_string(mode_of_payment: int) -> str:
     if mode_of_payment == ModeOfPayments.CASH.value:
         return "Cash"
     elif mode_of_payment == ModeOfPayments.CHECK.value:
-        return "Check"
+        return "Cheque"
     elif mode_of_payment == ModeOfPayments.WAGE_GARNISHMENT.value:
         return "Wage Garnishment"
     elif mode_of_payment == ModeOfPayments.STANDING_ORDER.value:

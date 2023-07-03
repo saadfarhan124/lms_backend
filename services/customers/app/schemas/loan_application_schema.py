@@ -80,10 +80,15 @@ class GuarantorsList(BaseModel):
 # 
 class LoanApplicationPaymentScheduleCreate(BaseModel):
     loan_application_id: Union[None, int]
+    # loan_application_id: Union[None, int]
+    loan_repayment_amount: Union[None, Decimal]
+    principal_paid: Union[None, Decimal]
     payment_date: date
     bagging_balance: Decimal
     balance: Decimal
     interest_paid: Decimal
+   
+
 
 class LoanApplicationPaymentScheduleUpdate(LoanApplicationPaymentScheduleCreate):
     id: int
@@ -160,11 +165,17 @@ class LoanApplication(LoanApplicationUpdate):
 
 class PaymentSchedule(BaseModel):
     current_date: date
-    total_amount: Decimal
-    loan_repayment_amount: Decimal
-    interest_amount: Decimal
+    total_amount: Union[None, Decimal]
+    loan_repayment_amount: Union[None, Decimal]
     num_payments: int
     term_mode: int
+    principal_amount: Union[None, Decimal]
+    interest_rate: Union[None, Decimal]
+    interest_amount: Union[None, Decimal]
+    interest_rate_is_flat: Union[None, bool]
+    o_and_s_rate: Union[None, Decimal]
+    o_and_s_amount: Union[None, Decimal]
+    o_and_s_rate_is_flat: Union[None, bool]
 
 # 
 
@@ -177,3 +188,8 @@ class PreDefinedFeesUpdate(PreDefinedFeesCreate):
 class PreDefinedFees(PreDefinedFeesUpdate):
     class Config:
         orm_mode = True
+
+
+class ScheduleReturn(BaseModel):
+    schedule: List[LoanApplicationPaymentScheduleCreate]
+    breakdown: PaymentSchedule

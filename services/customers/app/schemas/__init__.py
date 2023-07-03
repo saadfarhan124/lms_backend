@@ -14,3 +14,4 @@ from .loan_application_schema import LoanApplicationChequesCreate, LoanApplicati
 from .loan_application_schema import FeesCreate, FeesUpdate, Fees
 from .loan_application_schema import PreDefinedFeesCreate, PreDefinedFeesUpdate, PreDefinedFees
 from .loan_application_schema import PaymentSchedule
+from .loan_application_schema import ScheduleReturn
