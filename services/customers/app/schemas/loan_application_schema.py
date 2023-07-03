@@ -4,7 +4,7 @@ from app.constants import is_valid_term_mode, is_valid_payment_mode
 from app.constants import get_loan_type_string, get_loan_status_string
 from typing import List, Union
 from datetime import date
-from app.schemas import Customer, CustomerTest
+from app.schemas import Customer
 
 
 #
@@ -166,7 +166,7 @@ class LoanApplicationUpdate(LoanApplicationCreate):
 
 
 class LoanApplication(LoanApplicationUpdate):
-    customers: CustomerTest
+    # customers: CustomerTest
     guarantors: List[Guarantor]
     co_borrowers: Union[None, List[Customer]]
     cheques: Union[None, List[LoanApplicationCheques]]
