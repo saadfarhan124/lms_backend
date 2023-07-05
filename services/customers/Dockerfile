@@ -1,9 +1,11 @@
 FROM python:3.10-slim
 
+ENV SQLALCHEMY_DATABASE_URI=postgresql://postgres:postgres@lmsdb:5432/lms_db
+
 
 RUN apt-get update -yqq \
     && apt-get install -yqq --no-install-recommends \
-    netcat \
+    netcat-openbsd \
     && apt-get -q clean
 
 WORKDIR /app
@@ -16,8 +18,13 @@ COPY ./app /app
 
 EXPOSE 6061
 
+
+
 CMD ["uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "6061"]
 
 
 # CMD ["python", "main.py"]
+ENV DATABASE_URL postgresql://postgres:U$H8ye%cy4zz6anx@/lms_db?host=/cloudsql/clear-arbor-382814:europe-west6:bravos-lms/
+
 # CMD ["uvicorn", "main:app", "--reload", "--port", "6061"]
+# U$H8ye%cy4zz6anx

@@ -92,7 +92,7 @@ def get_loan_applications(offset: int, limit: int, db: Session = Depends(get_db)
         loan_application.status_string = get_loan_status_string(
             loan_application.status)
 
-        if loan_application.customers.individual[0] is not None:
+        if loan_application.customers.individual is not None and len(loan_application.customers.individual) > 0:
             loan_application.customer_name = loan_application.customers.individual[
                 0].first_name + " " + loan_application.customers.individual[0].last_name
         else:
@@ -109,6 +109,7 @@ def get_loan_applications(id: int, db: Session = Depends(get_db)):
         customer = loan_application.customers.individual[0]
     else:
         customer = loan_application.customers.business[0]
+    print(customer.id)
     return LoanApplicationWithCustomer(loan_application=loan_application, customer=customer)
 
 

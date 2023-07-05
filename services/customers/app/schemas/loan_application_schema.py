@@ -1,7 +1,7 @@
 from pydantic import BaseModel, validator
 from decimal import Decimal
 from app.constants import is_valid_term_mode, is_valid_payment_mode
-from app.constants import get_loan_type_string, get_loan_status_string
+from app.constants import get_loan_type_string, get_loan_status_string, get_term_modes_string, get_mode_of_payments_string
 from typing import List, Union
 from datetime import date
 from app.schemas import Customer, Individual, Business
@@ -175,6 +175,16 @@ class LoanApplication(LoanApplicationUpdate):
     formatted_date_str: str = None
     loan_type_string: str = None
     status_string: str = None
+    term_string: str = None
+    payment_mode_string: str = None
+
+    @validator("payment_mode_string", always=True)
+    def get_payment_mode_string(cls, v, values, **kwargs):
+        return f"{get_mode_of_payments_string(values['mode_of_payment'])}"
+    
+    @validator("term_string", always=True)
+    def get_term_string(cls, v, values, **kwargs):
+        return f"{get_term_modes_string(values['term'])}"
 
     @validator("loan_type_string", always=True)
     def get_loan_type_string(cls, v, values, **kwargs):
@@ -251,4 +261,10 @@ class ScheduleReturn(BaseModel):
 
 class LoanApplicationWithCustomer(BaseModel):
     loan_application: LoanApplication
-    customer: Union[Individual, Business]
+    customer: Individual
+
+class LoanApplicationWithCustomerIndividual(LoanApplicationWithCustomer):
+    customer: Individual
+
+class LoanApplicationWithCustomerBusiness(LoanApplicationWithCustomer):
+    customer: Business
