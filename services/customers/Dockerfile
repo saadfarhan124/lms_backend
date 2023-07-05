@@ -24,7 +24,3 @@ CMD ["uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "6061
 
 
 # CMD ["python", "main.py"]
-ENV DATABASE_URL postgresql://postgres:U$H8ye%cy4zz6anx@/lms_db?host=/cloudsql/clear-arbor-382814:europe-west6:bravos-lms/
-
-# CMD ["uvicorn", "main:app", "--reload", "--port", "6061"]
-# U$H8ye%cy4zz6anx
