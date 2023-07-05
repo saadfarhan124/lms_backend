@@ -24,3 +24,6 @@ CMD ["uvicorn", "app.main:app", "--reload", "--host", "0.0.0.0", "--port", "6061
 
 
 # CMD ["python", "main.py"]
+
+# CMD ["uvicorn", "main:app", "--reload", "--port", "6061"]
+# U$H8ye%cy4zz6anx
