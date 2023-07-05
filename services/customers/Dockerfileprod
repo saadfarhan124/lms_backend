@@ -9,7 +9,7 @@ RUN apt-get update -yqq \
 
 WORKDIR /app/services/customers
 
-COPY ./requirements.txt /app/services/customers/requirements.txt
+COPY ./services/customers/requirements.txt /app/services/customers/requirements.txt
 
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
