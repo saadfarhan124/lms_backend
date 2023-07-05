@@ -101,7 +101,7 @@ def get_loan_applications(offset: int, limit: int, db: Session = Depends(get_db)
     return {"loan_applications": loan_applications, "count": loan_application_crud.get_count(db)}
 
 
-@router.get('/loan_application/{id}/', response_model=LoanApplicationWithCustomer)
+@router.get('/loan_application/{id}', response_model=LoanApplicationWithCustomer)
 def get_loan_applications(id: int, db: Session = Depends(get_db)):
     loan_application = loan_application_crud.get(db, id=id)
     customer = None
