@@ -11,6 +11,7 @@ class TermModes(Enum):
 def get_term_modes_string(term_mode: int) -> str:
     # if term_mode == TermModes.DAYS.value:
     #     return "Days"
+    print(term_mode)
     if term_mode == TermModes.WEEKS.value:
         return "Weeks"
     elif term_mode == TermModes.MONTHS.value:

@@ -206,17 +206,21 @@ def update_gurantor(guarantor: GuarantorUpdate, db: Session = Depends(get_db)):
     return guarantor_crud.update(db, db_obj=guarantor_obj, update_schema=guarantor)
 
 
-# Utils
-@router.get("/loan_application/term_modes")
+@router.get("/loan_applications/term_modes")
 def get_term_modes():
-    term_modes = [
-        {"key": bt.value, "value": get_term_modes_string(bt.value)}
-        for bt in TermModes
-    ]
-    return {"data": term_modes}
+    try:
+        term_modes = [
+            {"key": bt.value, "value": get_term_modes_string(bt.value)}
+            for bt in TermModes
+        ]
+        return {"data": term_modes}
+    except ValidationError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=get_tracback())
 
 
-@router.get("/loan_application/payment_modes")
+@router.get("/loan_applications/payment_modes")
 def get_mode_pf_payments():
     term_modes = [
         {"key": bt.value, "value": get_mode_of_payments_string(bt.value)}
@@ -225,6 +229,6 @@ def get_mode_pf_payments():
     return {"data": term_modes}
 
 
-@router.get("/loan_application/predefined_fees", response_model=List[PreDefinedFees])
+@router.get("/loan_applications/predefined_fees", response_model=List[PreDefinedFees])
 def get_predefined_fees(db: Session = Depends(get_db)):
     return predefined_fees_crud.get_all(db)
