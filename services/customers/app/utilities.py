@@ -14,15 +14,4 @@ def get_tracback() -> Dict[str, Any]:
     }
 
 def get_formatted_date(date):
-    # Assuming the date_of_birth value is a string
-    # Determine the day suffix
-    if date.day in (1, 21, 31):
-        suffix = "st"
-    elif date.day in (2, 22):
-        suffix = "nd"
-    elif date.day in (3, 23):
-        suffix = "rd"
-    else:
-        suffix = "th"
-    formatted_date = date.strftime(f"%d{suffix} %b, %Y")
-    return f"{formatted_date}"
+    return f'{date.strftime(f"%d-%m-%Y")}'

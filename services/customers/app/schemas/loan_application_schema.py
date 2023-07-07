@@ -198,20 +198,7 @@ class LoanApplication(LoanApplicationUpdate):
     def get_formatted_date(cls, v, values, **kwargs):
         # Assuming the date_of_birth value is a string
         date_applied = values["date_applied"]
-        # Determine the day suffix
-        day = date_applied.day
-        if day in (1, 21, 31):
-            suffix = "st"
-        elif day in (2, 22):
-            suffix = "nd"
-        elif day in (3, 23):
-            suffix = "rd"
-        else:
-            suffix = "th"
-
-        # # Format the date
-        formatted_date = date_applied.strftime(f"%d{suffix} %b, %Y")
-        return f"{formatted_date}"
+        return f'{date_applied.strftime(f"%d-%m-%Y")}'
 
     class Config:
         orm_mode = True
