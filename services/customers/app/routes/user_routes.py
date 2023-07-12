@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from app.utils import users_crud, permission_crud
 from app.utilities import get_tracback, get_current_user
-from app.schemas import UserCreate, User, UsernameExists
+from app.schemas import UserCreate, User, UsernameExists, UserList
 from app.schemas import Login, LoginResponse
 from app.schemas import PermissionsCreate
 from app.constants import get_permission_strings, get_roles_strings
@@ -16,7 +16,7 @@ from typing import Any
 router = APIRouter()
 
 
-@router.post("/create_user", response_model=User)
+@router.post("/user", response_model=User)
 def create_user(user: UserCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> User:
     try:
         if not users_crud.check_if_has_permission(db, db_obj=current_user, permission_int=Permissions.ADD_USER.value):
@@ -51,6 +51,14 @@ def create_user(user: UserCreate, current_user: User = Depends(get_current_user)
     except Exception as e:
         raise HTTPException(status_code=500, detail=get_tracback())
 
+@router.get("/users/{offset}/{limit}", response_model=UserList)
+def get_users_by_pagination(offset: int, limit: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    try:
+        return UserList(users=users_crud.get_multi_excluding(db, offset=offset, limit=limit, exclude_id=current_user.id), count=users_crud.get_count(db))
+    except HTTPException as httpE:
+        raise httpE
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=get_tracback())
 
 @router.post("/login", response_model=LoginResponse)
 def login(login: Login, db: Session = Depends(get_db)):
