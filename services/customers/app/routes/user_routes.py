@@ -3,6 +3,7 @@ from app.utils import users_crud
 from app.utilities import get_tracback, get_current_user
 from app.schemas import UserCreate, User
 from app.schemas import Login, LoginResponse
+from app.constants import get_permission_strings
 from sqlalchemy.orm import Session
 from app.database.database import get_db
 from datetime import timedelta
@@ -44,3 +45,8 @@ def test_token(current_user: User = Depends(get_current_user)) -> Any:
     Test access token
     """
     return current_user
+
+
+@router.get("/permissions")
+def permissions() -> Any:
+    return get_permission_strings()

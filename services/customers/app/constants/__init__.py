@@ -8,3 +8,4 @@ from .term_modes import TermModes, get_term_modes_string, get_term_type_enum, is
 from .mode_of_payments import ModeOfPayments, get_mode_of_payments_string, get_mode_of_payment_enum, is_valid_payment_mode
 from .loan_status import LoanStatus, get_loan_status_string, get_loan_status_enum
 from .loan_type import LoanType, get_loan_type, get_loan_type_string
+from .permissions import get_permission_strings

@@ -17,7 +17,6 @@ reusable_oauth2 = OAuth2PasswordBearer(
 )
 
 
-
 def get_tracback() -> Dict[str, Any]:
     exc_type, exc_value, exc_tb = sys.exc_info()
     filename = exc_tb.tb_frame.f_code.co_filename
@@ -29,6 +28,7 @@ def get_tracback() -> Dict[str, Any]:
         'filename': filename,
         'error_string': error_string,
     }
+
 
 def get_formatted_date(date):
     return f'{date.strftime(f"%d-%m-%Y")}'
