@@ -116,7 +116,11 @@ def roles(current_user: User = Depends(get_current_user), db: Session = Depends(
 @router.get("/check_username")
 def check_username_if_exists(username: UsernameExists, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> bool:
     try:
-        return True if users_crud.get_by_username(db, username=username.username) is not None else False
+        if users_crud.check_if_has_permission(db, db_obj=current_user, permission_int=Permissions.ADD_USER.value):
+            return True if users_crud.get_by_username(db, username=username.username) is not None else False
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authorized")
     except HTTPException as httpE:
         raise httpE
     except Exception as e:
