@@ -64,6 +64,9 @@ class LoginResponse(BaseModel):
     user: User = Field(exclude={'password'})
     bearer_token: str
 
+class UpdatePassword(BaseModel):
+    password: str
+
 
 class TokenPayload(BaseModel):
     sub: Optional[int] = None

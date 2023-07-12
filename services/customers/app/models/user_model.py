@@ -19,6 +19,7 @@ class Users(Base):
     user_name = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     is_super_user = Column(Boolean, default=False, nullable=False)
+    is_deleted = Column(Boolean, nullable=False, default=False)
     permissions = relationship(
         "Permissions", secondary=user_permissions, back_populates="users")
     time_created = Column(DateTime(timezone=True),

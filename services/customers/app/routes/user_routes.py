@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.utils import users_crud, permission_crud
 from app.utilities import get_tracback, get_current_user
 from app.schemas import UserCreate, User, UsernameExists, UserList
-from app.schemas import Login, LoginResponse
+from app.schemas import Login, LoginResponse, UpdatePassword
 from app.schemas import PermissionsCreate
 from app.constants import get_permission_strings, get_roles_strings
 from app.constants import Permissions, role_permissions, is_valid_role, is_valid_permission, get_permission_string
@@ -54,7 +54,8 @@ def create_user(user: UserCreate, current_user: User = Depends(get_current_user)
 @router.get("/users/{offset}/{limit}", response_model=UserList)
 def get_users_by_pagination(offset: int, limit: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     try:
-        return UserList(users=users_crud.get_multi_excluding(db, offset=offset, limit=limit, exclude_id=current_user.id), count=users_crud.get_count(db))
+        users, count = users_crud.get_active_users(db, offset=offset, limit=limit, exclude_id=current_user.id)
+        return UserList(users=users, count=count)
     except HTTPException as httpE:
         raise httpE
     except Exception as e:
@@ -112,6 +113,19 @@ def login(login: Login, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=get_tracback())
 
+@router.put("/update_password/{user_id}", response_model=User)
+def update_user_password(user_id: int, password: UpdatePassword, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+    try:
+        if not users_crud.check_if_has_permission(db, db_obj=current_user, permission_int=Permissions.ADD_USER.value):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authorized")
+        else:
+            user_obj = users_crud.get(db, id=user_id)
+            return users_crud.update_password(db, db_obj=user_obj, password=password.password)
+    except HTTPException as httpE:
+        raise httpE
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=get_tracback())
 
 @router.post("/login/test-token", response_model=User)
 def test_token(current_user: User = Depends(get_current_user)) -> Any:
@@ -125,7 +139,6 @@ def test_token(current_user: User = Depends(get_current_user)) -> Any:
 @router.get("/permissions")
 def permissions(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> Any:
     try:
-        print(role_permissions)
         if users_crud.check_if_has_permission(db, db_obj=current_user, permission_int=Permissions.ADD_USER.value):
             return get_permission_strings()
         else:
