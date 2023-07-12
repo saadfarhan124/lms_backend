@@ -3,7 +3,7 @@ from app.utils import users_crud, permission_crud
 from app.utilities import get_tracback, get_current_user
 from app.schemas import UserCreate, User, UsernameExists, UserList
 from app.schemas import Login, LoginResponse, UpdatePassword
-from app.schemas import PermissionsCreate
+from app.schemas import PermissionsCreate, UserPermissionsUpdate
 from app.constants import get_permission_strings, get_roles_strings
 from app.constants import Permissions, role_permissions, is_valid_role, is_valid_permission, get_permission_string
 from sqlalchemy.orm import Session
@@ -69,6 +69,7 @@ def get_users_by_pagination(id: int, db: Session = Depends(get_db), current_user
         raise httpE
     except Exception as e:
         raise HTTPException(status_code=500, detail=get_tracback())
+    
 
 @router.delete("/user/{id}", response_model=User)
 def delete_user_by_id(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
@@ -85,7 +86,44 @@ def delete_user_by_id(id: int, db: Session = Depends(get_db), current_user: User
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot delete super user")
         
         return users_crud.delete_user(db, db_obj=user_obj)
-        # return users_crud.get(db, id=id)
+    except HTTPException as httpE:
+        raise httpE
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=get_tracback())
+    
+@router.put("/update_permissions/{user_id}", response_model=User)
+def update_permissions(user_id: int, permissions_request: UserPermissionsUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    try:
+        if not users_crud.check_if_has_permission(db, db_obj=current_user, permission_int=Permissions.ADD_USER.value):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authorized") 
+        else:
+            user_obj = users_crud.get(db, id=user_id)
+            if user_obj is None:
+                raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found") 
+            permissions = []
+            if permissions_request.role_based:
+                if not is_valid_role(permissions_request.permission_set):
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Role")
+                permissions = role_permissions[permissions_request.permission_set]
+            else:
+                permissions = permissions_request.permission_set
+                if not all(is_valid_permission(perm) for perm in permissions):
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Permission")
+            permission_obj_list = []
+            for perm in permissions:
+                permission = PermissionsCreate(
+                    permission_constant_id=perm,
+                    title=get_permission_string(perm)
+                )
+                perm_obj = permission_crud.create(db, create_schema=permission)
+                db.commit()
+                db.refresh(perm_obj)
+                permission_obj_list.append(perm_obj)
+            return users_crud.update_permissions(db, db_obj=user_obj, permissions=permission_obj_list)
     except HTTPException as httpE:
         raise httpE
     except Exception as e:

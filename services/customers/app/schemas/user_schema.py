@@ -48,6 +48,10 @@ class User(UserUpdate):
     class Config:
         orm_mode = True
 
+class UserPermissionsUpdate(BaseModel):
+    role_based: bool = Field(exclude=True)
+    permission_set: Union[List[int], int] = Field(exclude=True)
+
 class UserList(BaseModel):
     users: List[User]
     count: int
