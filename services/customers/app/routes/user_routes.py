@@ -59,6 +59,15 @@ def get_users_by_pagination(offset: int, limit: int, db: Session = Depends(get_d
         raise httpE
     except Exception as e:
         raise HTTPException(status_code=500, detail=get_tracback())
+    
+@router.get("/user/{id}", response_model=User)
+def get_users_by_pagination(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    try:
+        return users_crud.get(db, id=id)
+    except HTTPException as httpE:
+        raise httpE
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=get_tracback())
 
 @router.post("/login", response_model=LoginResponse)
 def login(login: Login, db: Session = Depends(get_db)):
