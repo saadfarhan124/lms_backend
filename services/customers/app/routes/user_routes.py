@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from app.utils import users_crud, permission_crud
 from app.utilities import get_tracback, get_current_user
-from app.schemas import UserCreate, User
+from app.schemas import UserCreate, User, UsernameExists
 from app.schemas import Login, LoginResponse
 from app.schemas import PermissionsCreate
 from app.constants import get_permission_strings, get_roles_strings
@@ -37,8 +37,8 @@ def create_user(user: UserCreate, current_user: User = Depends(get_current_user)
                         status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Permission")
             for perm in permissions:
                 permission = PermissionsCreate(
-                    permission_constant_id= perm,
-                    title= get_permission_string(perm)
+                    permission_constant_id=perm,
+                    title=get_permission_string(perm)
                 )
                 perm_obj = permission_crud.create(db, create_schema=permission)
                 user_obj.permissions.append(perm_obj)
@@ -107,6 +107,16 @@ def roles(current_user: User = Depends(get_current_user), db: Session = Depends(
         else:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authorized")
+    except HTTPException as httpE:
+        raise httpE
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=get_tracback())
+
+
+@router.get("/check_username")
+def check_username_if_exists(username: UsernameExists, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> bool:
+    try:
+        return True if users_crud.get_by_username(db, username=username.username) is not None else False
     except HTTPException as httpE:
         raise httpE
     except Exception as e:
