@@ -1,10 +1,11 @@
+import sys
 from app.models import Users, Permissions
 from app.utils.base import CRUDBase
 from sqlalchemy.orm import Session
 from app.schemas import UserCreate, UserUpdate
 from app.schemas import PermissionsCreate, PermissionsUpdate
 from app.core.security import get_password_hash, verify_password
-from typing import Optional, Union
+from typing import Optional, Union, List
 
 class CRUDPermissions(CRUDBase[Permissions, PermissionsCreate, PermissionsUpdate]):
     pass
@@ -47,17 +48,28 @@ class CRUDUsers(CRUDBase[Users, UserCreate, UserUpdate]):
         return any(permission_int == permission.permission_constant_id for permission in db_obj.permissions)
 
     def delete_user(self, db: Session, *, db_obj: Users) -> Users:
-        # permissions = [perm.id for perm in db_obj.permissions]
-        # db_obj.permissions.clear()    
-        # db.commit()
-        # db.query(Permissions).filter(Permissions.id.in_(permissions)).delete()
-        # db.delete(db_obj)
+       
         db_obj.is_deleted = True
         db_obj.user_name = db_obj.user_name+"deleted" 
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
         return db_obj
+    
+    def update_permissions(self, db: Session, *, db_obj: Users, permissions: List[Permissions]) -> Users:
+        old_permissions = [perm.id for perm in db_obj.permissions]
+        db_obj.permissions.clear()    
+        db.commit()
+        db.query(Permissions).filter(Permissions.id.in_(old_permissions)).delete()
+        print(permissions)
+        for perm in permissions:
+            print(perm.id)
+            db_obj.permissions.append(perm)
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
+       
     
     def get_active_users(self, db: Session, *, limit: int, offset: int, exclude_id: int):
         query = db.query(self.model).filter(self.model.is_deleted == False).filter(self.model.id != exclude_id)

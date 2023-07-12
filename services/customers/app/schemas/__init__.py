@@ -18,4 +18,4 @@ from .loan_application_schema import ScheduleReturn
 
 from .user_schema import UserCreate, UserUpdate, User, UsernameExists, UserList
 from .user_schema import Login, LoginResponse, TokenPayload, UpdatePassword
-from .user_schema import PermissionsCreate, PermissionsUpdate
+from .user_schema import PermissionsCreate, PermissionsUpdate, UserPermissionsUpdate
