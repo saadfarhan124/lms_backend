@@ -16,7 +16,7 @@ class Users(Base):
     id = Column(Integer, primary_key=True)
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
-    user_name = Column(String, nullable=False)
+    user_name = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     is_super_user = Column(Boolean, default=False, nullable=False)
     permissions = relationship(
