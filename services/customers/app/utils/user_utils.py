@@ -39,6 +39,14 @@ class CRUDUsers(CRUDBase[Users, UserCreate, UserUpdate]):
             return True   
         return any(permission_int == permission.permission_constant_id for permission in db_obj.permissions)
 
+    def delete_user(self, db: Session, *, db_obj: Users) -> Users:
+        permissions = [perm.id for perm in db_obj.permissions]
+        db_obj.permissions.clear()    
+        db.commit()
+        db.query(Permissions).filter(Permissions.id.in_(permissions)).delete()
+        db.delete(db_obj)
+        db.commit()
+        return db_obj
 
 users_crud = CRUDUsers(Users)
 permission_crud = CRUDPermissions(Permissions)
