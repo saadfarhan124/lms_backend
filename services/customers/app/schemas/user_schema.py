@@ -48,6 +48,9 @@ class User(UserUpdate):
     class Config:
         orm_mode = True
 
+class UsernameExists(BaseModel):
+    username: str
+
 class Login(BaseModel):
     user_name: str
     password: str
