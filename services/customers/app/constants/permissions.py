@@ -24,3 +24,6 @@ def get_permission_strings() -> str:
         for permission in Permissions
     }
     return permissions
+
+def is_valid_permission(permission_int: int) -> bool:
+    return any(permission_int == permission.value for permission in Permissions)
