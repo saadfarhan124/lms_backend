@@ -69,6 +69,27 @@ def get_users_by_pagination(id: int, db: Session = Depends(get_db), current_user
     except Exception as e:
         raise HTTPException(status_code=500, detail=get_tracback())
 
+@router.delete("/user/{id}", response_model=User)
+def delete_user_by_id(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    try:
+        if not users_crud.check_if_has_permission(db, db_obj=current_user, permission_int=Permissions.ADD_USER.value):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authorized") 
+        user_obj = users_crud.get(db, id=id)
+        if user_obj is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail= f"User with ID {id} does not exist")
+        if user_obj.is_super_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot delete super user")
+        
+        return users_crud.delete_user(db, db_obj=user_obj)
+        # return users_crud.get(db, id=id)
+    except HTTPException as httpE:
+        raise httpE
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=get_tracback())
+
 @router.post("/login", response_model=LoginResponse)
 def login(login: Login, db: Session = Depends(get_db)):
     try:
