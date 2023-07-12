@@ -25,6 +25,13 @@ class CRUDUsers(CRUDBase[Users, UserCreate, UserUpdate]):
         db.commit()
         db.refresh(db_obj)
         return db_obj
+    
+    def update_password(self, db: Session, *, db_obj: Users, password: str) -> Users:
+        db_obj.password = get_password_hash(password)
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
 
     def authenticate(self, db: Session, *, username: str, password: str) -> Union[Optional[Users], int]:
         user = self.get_by_username(db, username=username)
@@ -40,13 +47,24 @@ class CRUDUsers(CRUDBase[Users, UserCreate, UserUpdate]):
         return any(permission_int == permission.permission_constant_id for permission in db_obj.permissions)
 
     def delete_user(self, db: Session, *, db_obj: Users) -> Users:
-        permissions = [perm.id for perm in db_obj.permissions]
-        db_obj.permissions.clear()    
+        # permissions = [perm.id for perm in db_obj.permissions]
+        # db_obj.permissions.clear()    
+        # db.commit()
+        # db.query(Permissions).filter(Permissions.id.in_(permissions)).delete()
+        # db.delete(db_obj)
+        db_obj.is_deleted = True
+        db_obj.user_name = db_obj.user_name+"deleted" 
+        db.add(db_obj)
         db.commit()
-        db.query(Permissions).filter(Permissions.id.in_(permissions)).delete()
-        db.delete(db_obj)
-        db.commit()
+        db.refresh(db_obj)
         return db_obj
+    
+    def get_active_users(self, db: Session, *, limit: int, offset: int, exclude_id: int):
+        query = db.query(self.model).filter(self.model.is_deleted == False).filter(self.model.id != exclude_id)
+        filtered_users = query.order_by(self.model.id.desc()).offset(offset).limit(limit).all()
+        count = query.order_by(None).count()
+        return filtered_users, count
+    
 
 users_crud = CRUDUsers(Users)
 permission_crud = CRUDPermissions(Permissions)
