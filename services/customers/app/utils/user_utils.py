@@ -31,5 +31,8 @@ class CRUDUsers(CRUDBase[Users, UserCreate, UserUpdate]):
             return 400
         return user
 
+    def check_if_has_permission(self, db: Session, *, permission_int: int, db_obj: Users) -> bool:        
+        return any(permission_int == permission.permission_constant_id for permission in db_obj.permissions)
+
 
 users_crud = CRUDUsers(Users)

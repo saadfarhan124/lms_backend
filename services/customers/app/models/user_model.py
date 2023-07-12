@@ -30,6 +30,7 @@ class Users(Base):
 class Permissions(Base):
     __tablename__ = "permissions"
     id = Column(Integer, primary_key=True)
+    permission_constant_id = Column(Integer)
     title = Column(String, nullable=False)
     users = relationship(
         "Users", secondary=user_permissions, back_populates="permissions")

@@ -40,6 +40,7 @@ def login(login: Login, db: Session = Depends(get_db)):
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid password")
 
+        print(users_crud.check_if_has_permission(db, db_obj=response, permission_int=2))
         return LoginResponse(user=response, bearer_token=security.create_access_token(
             response.id, expires_delta=timedelta(
                 minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
