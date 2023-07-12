@@ -48,6 +48,10 @@ class User(UserUpdate):
     class Config:
         orm_mode = True
 
+class UserList(BaseModel):
+    users: List[User]
+    count: int
+
 class UsernameExists(BaseModel):
     username: str
 
