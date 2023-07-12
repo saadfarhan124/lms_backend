@@ -7,7 +7,7 @@ class Permissions(Enum):
     SET_USER_PERMISSIONS = 3
     TRACK_USER_ACTIVITY = 4
     APPROVE_CREDIT_MEMO = 5
-    VIEW_DASHBOARD_STATISTICS = 6
+    # VIEW_DASHBOARD_STATISTICS = 6
     REPORTS = 7
     ACCOUNTING = 8
     APPROVE_REVERSED_PAYMENTS = 9
@@ -24,6 +24,11 @@ def get_permission_strings() -> str:
         for permission in Permissions
     }
     return permissions
+
+def get_permission_string(id: int) -> str:
+    for perm in Permissions:
+        if id == perm.value:
+            return perm.name.replace("_", " ").title()
 
 def is_valid_permission(permission_int: int) -> bool:
     return any(permission_int == permission.value for permission in Permissions)

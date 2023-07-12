@@ -1,10 +1,13 @@
-from app.models import Users
+from app.models import Users, Permissions
 from app.utils.base import CRUDBase
 from sqlalchemy.orm import Session
 from app.schemas import UserCreate, UserUpdate
+from app.schemas import PermissionsCreate, PermissionsUpdate
 from app.core.security import get_password_hash, verify_password
 from typing import Optional, Union
 
+class CRUDPermissions(CRUDBase[Permissions, PermissionsCreate, PermissionsUpdate]):
+    pass
 
 class CRUDUsers(CRUDBase[Users, UserCreate, UserUpdate]):
 
@@ -31,8 +34,11 @@ class CRUDUsers(CRUDBase[Users, UserCreate, UserUpdate]):
             return 400
         return user
 
-    def check_if_has_permission(self, db: Session, *, permission_int: int, db_obj: Users) -> bool:        
+    def check_if_has_permission(self, db: Session, *, permission_int: int, db_obj: Users) -> bool:     
+        if db_obj.is_super_user:
+            return True   
         return any(permission_int == permission.permission_constant_id for permission in db_obj.permissions)
 
 
 users_crud = CRUDUsers(Users)
+permission_crud = CRUDPermissions(Permissions)
