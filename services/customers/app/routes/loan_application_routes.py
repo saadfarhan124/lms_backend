@@ -14,7 +14,7 @@ from app.utilities import get_tracback, get_formatted_date
 from app.constants import TermModes, get_term_modes_string, ModeOfPayments, get_mode_of_payments_string
 from app.constants import get_loan_status_string, get_loan_type_string
 from app.constants import CustomerType
-from datetime import datetime, timedelta
+from datetime import timedelta
 from pydantic import ValidationError
 
 

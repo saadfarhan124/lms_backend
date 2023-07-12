@@ -9,3 +9,7 @@ SQLAlchemy==2.0.17
 starlette==0.14.2
 typing_extensions==4.7.1
 uvicorn==0.15.0
+email-validator
+python-jose[extras]
+passlib[extras]
+

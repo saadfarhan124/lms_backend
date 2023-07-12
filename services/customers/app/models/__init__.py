@@ -11,4 +11,6 @@ from .loan_application_model import LoanApplicationPaymentSchedule
 from .loan_application_model import LoanApplicationCheques
 from .loan_application_model import Fees
 from .loan_application_model import PreDefinedFees
+
+from .user_model import Users
 # from .loan_application_model import loan_application_co_borrowers

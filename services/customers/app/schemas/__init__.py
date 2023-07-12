@@ -15,3 +15,6 @@ from .loan_application_schema import FeesCreate, FeesUpdate, Fees
 from .loan_application_schema import PreDefinedFeesCreate, PreDefinedFeesUpdate, PreDefinedFees
 from .loan_application_schema import PaymentSchedule, LoanApplicationWithCustomer, LoanApplicationWithCustomerIndividual, LoanApplicationWithCustomerBusiness
 from .loan_application_schema import ScheduleReturn
+
+from .user_schema import UserCreate, UserUpdate, User
+from .user_schema import Login, LoginResponse, TokenPayload
