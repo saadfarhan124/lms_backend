@@ -31,7 +31,7 @@ role_permissions = {
     ],
     Roles.PROJECT_MANAGER.value: [
         Permissions.VIEW_STATISTICS.value,
-        Permissions.VIEW_REPORTS.value,
+        Permissions.REPORTS.value,
         Permissions.ACCOUNTING.value
     ],
 

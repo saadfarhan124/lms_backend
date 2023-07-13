@@ -109,7 +109,6 @@ def get_loan_applications(id: int, db: Session = Depends(get_db)):
         customer = loan_application.customers.individual[0]
     else:
         customer = loan_application.customers.business[0]
-    print(customer.id)
     return LoanApplicationWithCustomer(loan_application=loan_application, customer=customer)
 
 

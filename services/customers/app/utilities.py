@@ -34,6 +34,67 @@ def get_formatted_date(date):
     return f'{date.strftime(f"%d-%m-%Y")}'
 
 
+def get_super_user_menu_items():
+    return [
+        {
+            "title": "Accounting",
+            "url": "/accounting"
+        },
+        {
+            "title": "Customers",
+            "url": "/customers/list-customers",
+            "sub_items": [
+                {
+                    "title": "Add Customer",
+                    "url": "/customers/add-customers"
+                },
+                {
+                    "title": "View All Customers",
+                    "url": "/customers/list-customers"
+                }
+            ]
+        },
+        {
+            "title": "Dashboard",
+            "url": "/dashboard"
+        },
+        {
+            "title": "Loan Applications",
+            "url": "/customers/list-loan-applications",
+            "sub_items": [
+                {
+                    "title": "Add Loan Application",
+                    "url": "/loan-application/add-loan-application"
+                },
+                {
+                    "title": "View All Loan Applications",
+                    "url": "/loan-application/list-loan-applications"
+                }
+            ]
+        },
+        {
+            "title": "Reports",
+            "url": "/reports"
+        },
+        {
+            "title": "Users",
+            "url": "/users/list-users",
+            "sub_items": [
+                {
+                    "title": "Add User",
+                    "url": "/users/add-user"
+                },
+                {
+                    "title": "View All Users",
+                    "url": "/users/list-users"
+                }
+            ]
+        },
+
+
+    ]
+
+
 def get_current_user(
     db: Session = Depends(get_db), token: str = Depends(reusable_oauth2)
 ) -> User:

@@ -61,9 +61,7 @@ class CRUDUsers(CRUDBase[Users, UserCreate, UserUpdate]):
         db_obj.permissions.clear()    
         db.commit()
         db.query(Permissions).filter(Permissions.id.in_(old_permissions)).delete()
-        print(permissions)
         for perm in permissions:
-            print(perm.id)
             db_obj.permissions.append(perm)
         db.add(db_obj)
         db.commit()

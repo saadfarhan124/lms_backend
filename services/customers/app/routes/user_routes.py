@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from app.utils import users_crud, permission_crud
-from app.utilities import get_tracback, get_current_user
+from app.utilities import get_tracback, get_current_user, get_super_user_menu_items
 from app.schemas import UserCreate, User, UsernameExists, UserList
 from app.schemas import Login, LoginResponse, UpdatePassword
 from app.schemas import PermissionsCreate, UserPermissionsUpdate
@@ -51,16 +51,19 @@ def create_user(user: UserCreate, current_user: User = Depends(get_current_user)
     except Exception as e:
         raise HTTPException(status_code=500, detail=get_tracback())
 
+
 @router.get("/users/{offset}/{limit}", response_model=UserList)
 def get_users_by_pagination(offset: int, limit: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     try:
-        users, count = users_crud.get_active_users(db, offset=offset, limit=limit, exclude_id=current_user.id)
+        users, count = users_crud.get_active_users(
+            db, offset=offset, limit=limit, exclude_id=current_user.id)
         return UserList(users=users, count=count)
     except HTTPException as httpE:
         raise httpE
     except Exception as e:
         raise HTTPException(status_code=500, detail=get_tracback())
-    
+
+
 @router.get("/user/{id}", response_model=User)
 def get_users_by_pagination(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     try:
@@ -69,39 +72,40 @@ def get_users_by_pagination(id: int, db: Session = Depends(get_db), current_user
         raise httpE
     except Exception as e:
         raise HTTPException(status_code=500, detail=get_tracback())
-    
+
 
 @router.delete("/user/{id}", response_model=User)
 def delete_user_by_id(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     try:
         if not users_crud.check_if_has_permission(db, db_obj=current_user, permission_int=Permissions.ADD_USER.value):
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authorized") 
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authorized")
         user_obj = users_crud.get(db, id=id)
         if user_obj is None:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail= f"User with ID {id} does not exist")
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"User with ID {id} does not exist")
         if user_obj.is_super_user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot delete super user")
-        
+
         return users_crud.delete_user(db, db_obj=user_obj)
     except HTTPException as httpE:
         raise httpE
     except Exception as e:
         raise HTTPException(status_code=500, detail=get_tracback())
-    
+
+
 @router.put("/update_permissions/{user_id}", response_model=User)
 def update_permissions(user_id: int, permissions_request: UserPermissionsUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     try:
         if not users_crud.check_if_has_permission(db, db_obj=current_user, permission_int=Permissions.ADD_USER.value):
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authorized") 
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authorized")
         else:
             user_obj = users_crud.get(db, id=user_id)
             if user_obj is None:
                 raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="User not found") 
+                    status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
             permissions = []
             if permissions_request.role_based:
                 if not is_valid_role(permissions_request.permission_set):
@@ -129,6 +133,22 @@ def update_permissions(user_id: int, permissions_request: UserPermissionsUpdate,
     except Exception as e:
         raise HTTPException(status_code=500, detail=get_tracback())
 
+
+@router.put("/update_password/{user_id}", response_model=User)
+def update_user_password(user_id: int, password: UpdatePassword, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    try:
+        if not users_crud.check_if_has_permission(db, db_obj=current_user, permission_int=Permissions.ADD_USER.value):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authorized")
+        else:
+            user_obj = users_crud.get(db, id=user_id)
+            return users_crud.update_password(db, db_obj=user_obj, password=password.password)
+    except HTTPException as httpE:
+        raise httpE
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=get_tracback())
+
+
 @router.post("/login", response_model=LoginResponse)
 def login(login: Login, db: Session = Depends(get_db)):
     try:
@@ -151,19 +171,85 @@ def login(login: Login, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=get_tracback())
 
-@router.put("/update_password/{user_id}", response_model=User)
-def update_user_password(user_id: int, password: UpdatePassword, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
-    try:
-        if not users_crud.check_if_has_permission(db, db_obj=current_user, permission_int=Permissions.ADD_USER.value):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authorized")
-        else:
-            user_obj = users_crud.get(db, id=user_id)
-            return users_crud.update_password(db, db_obj=user_obj, password=password.password)
-    except HTTPException as httpE:
-        raise httpE
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=get_tracback())
+
+@router.get("/menu_items")
+def get_menu_items(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if current_user.is_super_user:
+        return get_super_user_menu_items()
+    else:
+        common_items = [
+            {
+                "title": "Customers",
+                "url": "/customers/list-customers",
+                "sub_items": [
+                    {
+                        "title": "View All Customers",
+                        "url": "/customers/list-customers"
+                    }
+                ]
+            },
+            {
+                "title": "Loan Applications",
+                "url": "/customers/list-loan-applications",
+                "sub_items": [
+                    {
+                        "title": "View All Loan Applications",
+                        "url": "/loan-application/list-loan-applications"
+                    }
+                ]
+            },
+            {
+                "title": "Users",
+                "url": "/users/list-users",
+                "sub_items": [
+                    {
+                        "title": "View All Users",
+                        "url": "/users/list-users"
+                    }
+                ]
+            },
+        ]
+        user_permissions = current_user.permissions
+        for perm in user_permissions:
+            if perm.permission_constant_id == Permissions.ADD_CUSTOMER.value:
+                for item in common_items:
+                    if item["title"] == "Customers":
+                        item["sub_items"].insert(0, {
+                            "title": "Add Customer",
+                            "url": "/customers/add-customers"
+                        })
+            elif perm.permission_constant_id == Permissions.ADD_LOAN_APPLICATION.value:
+                for item in common_items:
+                    if item["title"] == "Loan Applications":
+                        item["sub_items"].insert(0, {
+                            "title": "Add Loan Application",
+                            "url": "/loan-application/add-loan-application"
+                        })
+            elif perm.permission_constant_id == Permissions.ADD_USER.value:
+                for item in common_items:
+                    if item["title"] == "Users":
+                        item["sub_items"].insert(0, {
+                            "title": "Add User",
+                            "url": "/users/add-user"
+                        })
+            elif perm.permission_constant_id == Permissions.ACCOUNTING.value:
+                common_items.append({
+                    "title": "Accounting",
+                    "url": "/accounting"
+                })
+            elif perm.permission_constant_id == Permissions.REPORTS.value:
+                common_items.append({
+                    "title": "Reports",
+                    "url": "/reports"
+                })
+            elif perm.permission_constant_id == Permissions.VIEW_STATISTICS.value:
+                common_items.append({
+                    "title": "Dashboard",
+                    "url": "/dashboard"
+                })
+        
+        return sorted(common_items, key=lambda x: x["title"])
+
 
 @router.post("/login/test-token", response_model=User)
 def test_token(current_user: User = Depends(get_current_user)) -> Any:
